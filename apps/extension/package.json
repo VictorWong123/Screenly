@@ -1,0 +1,13 @@
+{
+  "name": "@screen-time/extension",
+  "version": "1.0.0",
+  "description": "Chrome MV3 extension for tracking active screen time",
+  "type": "module",
+  "scripts": {
+    "build": "cp -r src/* dist/ && cp manifest.json dist/",
+    "dev": "npm run build && echo 'Extension built. Load dist/ folder in Chrome extensions.'"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.254"
+  }
+}

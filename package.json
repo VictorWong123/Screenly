@@ -1,0 +1,19 @@
+{
+  "name": "screen-time",
+  "version": "1.0.0",
+  "description": "Track active screen time per domain with Chrome extension and visualization website",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:website": "cd apps/website && npm run dev",
+    "build:website": "cd apps/website && npm run build",
+    "build:extension": "cd apps/extension && npm run build",
+    "dev": "npm run dev:website"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.254"
+  }
+}
