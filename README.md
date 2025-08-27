@@ -1,255 +1,204 @@
-# ScreenTime
+# 🚀 ScreenTime - Time Tracking & Analytics
 
-A privacy-first screen time tracking system with a Chrome extension and visualization dashboard.
+A comprehensive time tracking application with Chrome extension integration and beautiful analytics dashboard.
 
-## Overview
+## ✨ Features
 
-ScreenTime tracks **active** screen time per domain, only when:
-- Chrome window is focused
-- Current tab is visible and active  
-- User is not idle for > 60 seconds
+- **Chrome Extension (MV3)**: Track active screen time per domain
+- **Web Dashboard**: Beautiful analytics with D3.js visualizations
+- **User Authentication**: Secure login/signup with Supabase
+- **Real-time Tracking**: Monitor focus time and productivity
+- **Data Export**: Export your data in JSON format
+- **Responsive Design**: Works on all devices
 
-Your data stays local - nothing is sent to external servers.
-
-## Features
-
-### Chrome Extension (MV3)
-- **Active tracking**: Only counts minutes when you're actually using the browser
-- **Domain categorization**: Automatically categorizes sites (Work, Social, Entertainment, etc.)
-- **Privacy-first**: All data stored locally in Chrome
-- **Export data**: Download JSON summaries for any time range
-- **Nightly rollup**: Automatically aggregates and prunes old data
-
-### Website Dashboard
-- **KPI cards**: Total time, streak, focus ratio, top domain with sparklines
-- **Interactive charts**: Stacked bars by day, donut by category
-- **Comparison mode**: Compare current period vs previous period
-- **Import data**: Load exported JSON from the extension
-- **Responsive design**: Optimized for 1440×900, scales to 1280×720
-
-## Project Structure
+## 🏗️ Architecture
 
 ```
 screenTime/
-├── package.json                 # Root workspace config
 ├── apps/
-│   ├── extension/              # Chrome MV3 extension
-│   │   ├── manifest.json       # Extension manifest
-│   │   ├── src/
-│   │   │   ├── background.js   # Service worker
-│   │   │   ├── content.js      # Content script
-│   │   │   └── options.js      # Options page logic
-│   │   └── options.html        # Options page UI
-│   └── website/                # React dashboard
-│       ├── src/
-│       │   ├── components/     # React components
-│       │   ├── data/           # Data and adapters
-│       │   └── lib/            # Utility functions
-│       ├── index.html          # Entry point
-│       └── package.json        # Website dependencies
-└── packages/
-    └── shared/                 # Shared utilities
-        └── index.js            # Domain categorization, formatters
+│   ├── extension/          # Chrome MV3 extension
+│   └── website/           # React + Vite dashboard
+├── packages/
+│   └── shared/            # Shared utilities and types
+└── SUPABASE_SETUP.md      # Supabase configuration guide
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
-### 1. Install Dependencies
+### 1. Clone and Install
 
 ```bash
+git clone <your-repo-url>
+cd screenTime
 npm install
 ```
 
-### 2. Run the Website
+### 2. Set Up Supabase
 
-```bash
-npm run dev:website
-```
-
-The dashboard will open at `http://localhost:3000` with sample data loaded.
-
-### 3. Load the Chrome Extension
-
-1. Build the extension:
+1. **Follow the complete setup guide**: [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
+2. **Create your environment file**:
    ```bash
-   npm run build:extension
+   cp env.example .env
+   # Edit .env with your Supabase credentials
    ```
 
-2. Open Chrome and go to `chrome://extensions/`
+### 3. Run the Application
 
-3. Enable "Developer mode" (top right)
+```bash
+# Development mode
+npm run dev
 
-4. Click "Load unpacked" and select the `apps/extension/dist/` folder
+# Build for production
+npm run build
+```
 
-5. The ScreenTime extension should now appear in your extensions list
+## 🔐 Authentication Flow
 
-## Usage
+- **Unauthenticated users**: Can access the timer page
+- **Authenticated users**: Full access to dashboard and analytics
+- **Login/Signup**: Email + password authentication via Supabase
+- **Protected Routes**: Dashboard requires authentication
 
-### Extension Setup
+## 📱 Usage
 
-1. **Install**: Load the extension as described above
-2. **Permissions**: Grant required permissions when prompted
-3. **Start tracking**: The extension automatically begins tracking active time
-4. **Export data**: Right-click extension icon → Options → Export JSON
+### For Unauthenticated Users
+1. Visit `/timer` to use the time tracker
+2. Click "Sign Up" to create an account
+3. Or click "Sign In" if you already have an account
 
-### Dashboard Usage
+### For Authenticated Users
+1. **Dashboard** (`/dashboard`): View analytics and manage sessions
+2. **Timer** (`/timer`): Track new time sessions
+3. **Navigation**: Use the header to switch between pages
+4. **Logout**: Click "Sign Out" in the header
 
-1. **Load sample data**: Click "Load Sample" to see demo data
-2. **Import your data**: Click "Import Data" and select exported JSON from extension
-3. **Explore**: Switch between time ranges (Today, 7 days, 30 days)
-4. **Compare**: Toggle "vs previous period" to see changes
-5. **Charts**: Hover over charts for detailed tooltips
+## 🛠️ Development
 
-## Data Model
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+- Chrome browser (for extension testing)
 
-### Minute Events
-```javascript
-{
-  tsMinute: "2024-01-15T14:30", // ISO minute string
-  url: "https://github.com/user/repo",
-  domain: "github.com",
-  category: "Work",
-  minutes: 1
+### Available Scripts
+
+```bash
+# Root level
+npm run dev          # Start website in development mode
+npm run build        # Build website for production
+npm run dev:ext      # Build extension in watch mode
+
+# Extension specific
+cd apps/extension
+npm run build        # Build extension
+npm run watch        # Watch mode for development
+
+# Website specific
+cd apps/website
+npm run dev          # Start Vite dev server
+npm run build        # Build for production
+npm run preview      # Preview production build
+```
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
+```bash
+# Required for Supabase authentication
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+
+# Optional
+VITE_APP_NAME=ScreenTime
+NODE_ENV=development
+```
+
+## 🔧 Configuration
+
+### Supabase Setup
+Detailed instructions are in [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
+
+### Extension Configuration
+- Update `apps/extension/manifest.json` for extension metadata
+- Modify `apps/extension/src/background.js` for tracking logic
+- Customize `apps/extension/options.html` for settings
+
+### Website Configuration
+- Update `apps/website/vite.config.js` for build settings
+- Modify `apps/website/tailwind.config.js` for styling
+- Customize components in `apps/website/src/components/`
+
+## 📊 Data Structure
+
+### Screen Time Events
+```typescript
+interface MinuteEvent {
+  timestamp: string;
+  domain: string;
+  url: string;
+  category: string;
 }
 ```
 
 ### Daily Aggregates
-```javascript
-{
-  day: "2024-01-15",
-  totalMinutes: 420,
-  byCategory: {
-    Work: 240,
-    Social: 60,
-    Entertainment: 90,
-    Utilities: 20,
-    Other: 10
-  },
-  byDomainTop: [
-    { domain: "github.com", minutes: 180 },
-    { domain: "figma.com", minutes: 60 }
-  ]
+```typescript
+interface DailyAggregate {
+  dayKey: string;
+  totalMinutes: number;
+  byCategory: Record<string, number>;
+  byDomainTop: Array<{domain: string, minutes: number}>;
+  focusRatio: number;
 }
 ```
 
-### Summary
-```javascript
-{
-  range: { start: "2024-01-15", end: "2024-01-21" },
-  days: [DailyAggregate...],
-  totals: { minutes: 2520, byCategory: {...} },
-  topDomain: { domain: "github.com", minutes: 360 },
-  focusRatio: 25.0,
-  streakDays: 7
-}
+## 🎨 UI Components
+
+- **KpiCard**: Display key metrics with sparklines
+- **StackedBarsByDay**: Daily activity visualization
+- **DonutByCategory**: Category breakdown chart
+- **NavigationHeader**: User navigation and authentication
+- **TimerPanel**: Time tracking interface
+
+## 🔒 Security
+
+- **Row Level Security (RLS)** enabled on all tables
+- **User isolation**: Users can only access their own data
+- **Secure authentication** via Supabase Auth
+- **Environment variables** for sensitive configuration
+
+## 🚀 Deployment
+
+### Website
+```bash
+npm run build
+# Deploy dist/ folder to your hosting provider
 ```
 
-## Domain Categorization
-
-The extension automatically categorizes domains:
-
-- **Work**: GitHub, Figma, Notion, Slack, Linear, Jira, etc.
-- **Social**: Twitter, Instagram, TikTok, Reddit, Discord, etc.
-- **Entertainment**: YouTube, Netflix, Twitch, Hulu, etc.
-- **Utilities**: Google services, weather, maps, Wikipedia, etc.
-- **Other**: Unrecognized domains
-
-Categories are configurable in `packages/shared/index.js`.
-
-## Privacy & Data
-
-- **Local storage**: All data stored in Chrome's local storage
-- **No tracking**: Extension only tracks when you're actively using Chrome
-- **No external calls**: Data never leaves your browser
-- **Automatic cleanup**: Minute-level events pruned after 30 days
-- **Aggregates kept**: Daily summaries preserved indefinitely
-
-## Future Features (Stubbed)
-
-The project includes adapter stubs for future Supabase integration:
-
-- **Leaderboards**: Compare your stats with others
-- **Multi-device sync**: Share data across devices  
-- **Advanced analytics**: More detailed insights and trends
-- **Team features**: Share and compare with team
-
-### Supabase Integration
-
-For leaderboards and user authentication, see [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for complete setup instructions. members
-
-## Development
-
-### Adding New Categories
-
-Edit `packages/shared/index.js`:
-
-```javascript
-export function categorizeDomain(domain) {
-  const domainLower = domain.toLowerCase();
-  
-  // Add new category
-  if (['newsite.com', 'another.com'].some(d => domainLower.includes(d))) {
-    return 'News';
-  }
-  
-  // ... existing categories
-}
+### Extension
+```bash
+cd apps/extension
+npm run build
+# Load dist/ folder as unpacked extension in Chrome
 ```
 
-### Adding New Charts
-
-1. Create component in `apps/website/src/components/`
-2. Use D3 for visualization
-3. Import and add to `App.jsx`
-4. Follow existing chart patterns
-
-### Extension Development
-
-1. Make changes in `apps/extension/src/`
-2. Run `npm run build:extension`
-3. Reload extension in Chrome
-4. Check console for debugging info
-
-## Troubleshooting
-
-### Extension Not Tracking
-
-1. Check extension is enabled in `chrome://extensions/`
-2. Verify permissions are granted
-3. Check console for error messages
-4. Ensure Chrome window is focused
-
-### Dashboard Issues
-
-1. Check browser console for errors
-2. Verify JSON format matches expected schema
-3. Try loading sample data first
-4. Check network tab for failed requests
-
-### Build Issues
-
-1. Clear `node_modules` and reinstall
-2. Check Node.js version (requires 16+)
-3. Verify all dependencies are installed
-4. Check for TypeScript errors
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create feature branch
-3. Make changes following existing patterns
-4. Test extension and website
-5. Submit pull request
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-## License
+## 📝 License
 
-MIT License - see LICENSE file for details.
+This project is licensed under the MIT License.
 
-## Support
+## 🆘 Support
 
-For issues and questions:
-1. Check this README
-2. Review console logs
-3. Open GitHub issue with details
-4. Include Chrome version and OS info
-# Screenly
+- **Documentation**: Check [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed setup
+- **Issues**: Open an issue on GitHub
+- **Questions**: Check the documentation or open a discussion
+
+---
+
+**Happy Time Tracking! ⏰**

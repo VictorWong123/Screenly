@@ -1,8 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import { formatShortDate, getCategoryColor } from '../lib/format';
 
-const StackedBarsByDay = ({ data, categories, width = 500, height = 300, showComparison = false, comparisonData = null }) => {
+const StackedBarsByDay = ({ data, categories, width = 500, height = 300, showCompare = false, ghostData = null }) => {
   const svgRef = useRef();
 
   useEffect(() => {
@@ -14,6 +13,9 @@ const StackedBarsByDay = ({ data, categories, width = 500, height = 300, showCom
     const margin = { top: 20, right: 20, bottom: 40, left: 40 };
     const chartWidth = width - margin.left - margin.right;
     const chartHeight = height - margin.top - margin.bottom;
+
+    // Create color scale
+    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
     // Prepare data for stacking
     const stack = d3.stack()
@@ -37,13 +39,13 @@ const StackedBarsByDay = ({ data, categories, width = 500, height = 300, showCom
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
     // Add comparison overlay if enabled
-    if (showComparison && comparisonData) {
+    if (showCompare && ghostData) {
       const comparisonStack = d3.stack()
         .keys(categories)
         .value((d, key) => d.byCategory[key] || 0);
-      
-      const comparisonStacked = comparisonStack(comparisonData);
-      
+
+      const comparisonStacked = comparisonStack(ghostData);
+
       // Add ghosted comparison bars
       comparisonStacked.forEach((category, i) => {
         chart.selectAll('.comparison-bar')
@@ -55,9 +57,9 @@ const StackedBarsByDay = ({ data, categories, width = 500, height = 300, showCom
           .attr('y', d => y(d[1]))
           .attr('width', x.bandwidth())
           .attr('height', d => y(d[0]) - y(d[1]))
-          .attr('fill', getCategoryColor(categories[i]))
+          .attr('fill', colorScale(categories[i]))
           .attr('opacity', 0.2)
-          .attr('stroke', getCategoryColor(categories[i]))
+          .attr('stroke', colorScale(categories[i]))
           .attr('stroke-width', 1)
           .attr('stroke-dasharray', '3,3');
       });
@@ -74,11 +76,11 @@ const StackedBarsByDay = ({ data, categories, width = 500, height = 300, showCom
         .attr('y', d => y(d[1]))
         .attr('width', x.bandwidth())
         .attr('height', d => y(d[0]) - y(d[1]))
-        .attr('fill', getCategoryColor(categories[i]))
+        .attr('fill', colorScale(categories[i]))
         .attr('opacity', 0.8)
-        .on('mouseover', function(event, d) {
+        .on('mouseover', function (event, d) {
           d3.select(this).attr('opacity', 1);
-          
+
           // Show tooltip
           const tooltip = d3.select('body').append('div')
             .attr('class', 'tooltip')
@@ -90,20 +92,25 @@ const StackedBarsByDay = ({ data, categories, width = 500, height = 300, showCom
             .style('font-size', '12px')
             .style('pointer-events', 'none')
             .style('z-index', 1000);
-          
+
+          const formatDate = (dateStr) => {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          };
+
           tooltip.html(`
-            <div><strong>${formatShortDate(d.data.day)}</strong></div>
+            <div><strong>${formatDate(d.data.day)}</strong></div>
             <div>${categories[i]}: ${d[1] - d[0]} min</div>
             <div>Total: ${d.data.totalMinutes} min</div>
           `);
         })
-        .on('mousemove', function(event) {
+        .on('mousemove', function (event) {
           const tooltip = d3.select('.tooltip');
           tooltip
             .style('left', (event.pageX + 10) + 'px')
             .style('top', (event.pageY - 10) + 'px');
         })
-        .on('mouseout', function() {
+        .on('mouseout', function () {
           d3.select(this).attr('opacity', 0.8);
           d3.select('.tooltip').remove();
         });
@@ -116,7 +123,10 @@ const StackedBarsByDay = ({ data, categories, width = 500, height = 300, showCom
       .selectAll('text')
       .style('text-anchor', 'middle')
       .attr('dy', '0.5em')
-      .text(d => formatShortDate(d));
+      .text(d => {
+        const date = new Date(d);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      });
 
     // Add Y axis
     chart.append('g')
@@ -132,7 +142,7 @@ const StackedBarsByDay = ({ data, categories, width = 500, height = 300, showCom
       .style('font-weight', '500')
       .text('Daily Activity by Category');
 
-  }, [data, categories, width, height, showComparison, comparisonData]);
+  }, [data, categories, width, height, showCompare, ghostData]);
 
   return (
     <div className="card p-6">

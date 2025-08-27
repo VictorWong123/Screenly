@@ -1,19 +1,14 @@
 {
-  "name": "screen-time",
+  "name": "chronica",
   "version": "1.0.0",
-  "description": "Track active screen time per domain with Chrome extension and visualization website",
+  "description": "Manual timer + CRUD time tracker",
   "private": true,
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
-    "dev:website": "cd apps/website && npm run dev",
-    "build:website": "cd apps/website && npm run build",
-    "build:extension": "cd apps/extension && npm run build",
-    "dev": "npm run dev:website"
-  },
-  "devDependencies": {
-    "@types/chrome": "^0.0.254"
+    "dev": "cd apps/website && npm run dev",
+    "build": "cd apps/website && npm run build",
+    "preview": "cd apps/website && npm run preview"
   }
 }

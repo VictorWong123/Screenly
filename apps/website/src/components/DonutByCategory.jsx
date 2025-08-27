@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import { formatMinutes, getCategoryColor } from '../lib/format';
 
 const DonutByCategory = ({ data, width = 300, height = 300 }) => {
   const svgRef = useRef();
@@ -15,6 +14,9 @@ const DonutByCategory = ({ data, width = 300, height = 300 }) => {
     const chartWidth = width - margin.left - margin.right;
     const chartHeight = height - margin.top - margin.bottom;
     const radius = Math.min(chartWidth, chartHeight) / 2;
+
+    // Create color scale
+    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
     // Prepare data
     const pieData = Object.entries(data)
@@ -49,14 +51,14 @@ const DonutByCategory = ({ data, width = 300, height = 300 }) => {
 
     slices.append('path')
       .attr('d', arc)
-      .attr('fill', d => getCategoryColor(d.data.category))
+      .attr('fill', d => colorScale(d.data.category))
       .attr('stroke', 'white')
       .attr('stroke-width', 2)
-      .on('mouseover', function(event, d) {
+      .on('mouseover', function (event, d) {
         d3.select(this)
           .attr('stroke-width', 3)
           .attr('stroke', '#000');
-        
+
         // Show tooltip
         const tooltip = d3.select('body').append('div')
           .attr('class', 'tooltip')
@@ -68,20 +70,32 @@ const DonutByCategory = ({ data, width = 300, height = 300 }) => {
           .style('font-size', '12px')
           .style('pointer-events', 'none')
           .style('z-index', 1000);
-        
+
+        const formatMinutes = (minutes) => {
+          if (minutes < 60) {
+            return `${minutes}m`;
+          }
+          const hours = Math.floor(minutes / 60);
+          const remainingMinutes = minutes % 60;
+          if (remainingMinutes === 0) {
+            return `${hours}h`;
+          }
+          return `${hours}h ${remainingMinutes}m`;
+        };
+
         tooltip.html(`
           <div><strong>${d.data.category}</strong></div>
           <div>${formatMinutes(d.data.value)}</div>
           <div>${((d.data.value / d3.sum(pieData, d => d.value)) * 100).toFixed(1)}%</div>
         `);
       })
-      .on('mousemove', function(event) {
+      .on('mousemove', function (event) {
         const tooltip = d3.select('.tooltip');
         tooltip
           .style('left', (event.pageX + 10) + 'px')
           .style('top', (event.pageY - 10) + 'px');
       })
-      .on('mouseout', function() {
+      .on('mouseout', function () {
         d3.select(this)
           .attr('stroke-width', 2)
           .attr('stroke', 'white');
@@ -90,7 +104,7 @@ const DonutByCategory = ({ data, width = 300, height = 300 }) => {
 
     // Add labels
     const labelRadius = radius * 0.9;
-    
+
     slices.append('text')
       .attr('transform', d => {
         const pos = outerArc.centroid(d);
@@ -107,6 +121,18 @@ const DonutByCategory = ({ data, width = 300, height = 300 }) => {
       .text(d => d.data.category);
 
     // Add value labels
+    const formatMinutes = (minutes) => {
+      if (minutes < 60) {
+        return `${minutes}m`;
+      }
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      if (remainingMinutes === 0) {
+        return `${hours}h`;
+      }
+      return `${hours}h ${remainingMinutes}m`;
+    };
+
     slices.append('text')
       .attr('transform', d => `translate(${arc.centroid(d)})`)
       .style('text-anchor', 'middle')
@@ -123,7 +149,7 @@ const DonutByCategory = ({ data, width = 300, height = 300 }) => {
       .style('font-size', '16px')
       .style('font-weight', '600')
       .text('Total');
-    
+
     chart.append('text')
       .attr('text-anchor', 'middle')
       .attr('dy', '0.5em')
