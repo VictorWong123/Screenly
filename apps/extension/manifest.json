@@ -1,0 +1,35 @@
+{
+    "manifest_version": 3,
+    "name": "Screenly",
+    "version": "1.0.0",
+    "description": "Track active screen time per domain with intelligent focus detection",
+    "permissions": [
+        "storage",
+        "tabs",
+        "idle",
+        "alarms",
+        "downloads"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "options_page": "options.html",
+    "icons": {
+        "16": "icons/icon.svg",
+        "48": "icons/icon.svg",
+        "128": "icons/icon.svg"
+    }
+}

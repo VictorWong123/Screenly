@@ -369,7 +369,7 @@ const DashboardPage = () => {
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-zinc-100 mb-2">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-zinc-100 mb-2">Screenly Dashboard</h1>
           <p className="text-zinc-400">Track your productivity and time management</p>
         </div>
 

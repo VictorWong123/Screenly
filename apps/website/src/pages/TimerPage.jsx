@@ -603,7 +603,7 @@ const TimerPage = () => {
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-zinc-100 mb-2">Time Tracker</h1>
+          <h1 className="text-3xl font-bold text-zinc-100 mb-2">Screenly Timer</h1>
           <p className="text-zinc-400">Track your productivity, one activity at a time</p>
         </div>
 

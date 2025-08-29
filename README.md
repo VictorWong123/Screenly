@@ -1,185 +1,154 @@
-# 🚀 ScreenTime - Time Tracking & Analytics
+# Screenly - Smart Screen Time Tracking
 
-A comprehensive time tracking application with Chrome extension integration and beautiful analytics dashboard.
+A comprehensive productivity tracking solution with a Chrome extension for active screen time monitoring and a React dashboard for insights and analytics.
 
-## ✨ Features
+## 🚀 Features
 
-- **Chrome Extension (MV3)**: Track active screen time per domain
-- **Web Dashboard**: Beautiful analytics with D3.js visualizations
-- **User Authentication**: Secure login/signup with Supabase
-- **Real-time Tracking**: Monitor focus time and productivity
-- **Data Export**: Export your data in JSON format
-- **Responsive Design**: Works on all devices
+- **Chrome Extension (MV3)**: Tracks active screen time per domain with intelligent focus detection
+- **React Dashboard**: Beautiful dark-themed interface with D3.js charts and analytics
+- **Supabase Integration**: User authentication and data persistence
+- **Timer System**: Manual time tracking for activities and projects
+- **Real-time Analytics**: Daily, weekly, and monthly productivity insights
 
 ## 🏗️ Architecture
 
 ```
-screenTime/
+screenly/
 ├── apps/
 │   ├── extension/          # Chrome MV3 extension
-│   └── website/           # React + Vite dashboard
-├── packages/
-│   └── shared/            # Shared utilities and types
-└── SUPABASE_SETUP.md      # Supabase configuration guide
+│   └── website/           # React + Vite + Tailwind + D3 dashboard
+└── packages/
+    └── shared/            # Shared utilities and types
 ```
 
-## 🚀 Quick Start
+## 🛠️ Tech Stack
+
+- **Extension**: Chrome MV3, Vanilla JavaScript
+- **Website**: React 18, Vite, Tailwind CSS, D3.js
+- **Backend**: Supabase (Auth, Database)
+- **Database**: PostgreSQL with Row Level Security
+- **Styling**: Dark theme with purple accents
+
+## 📦 Installation
+
+### Prerequisites
+- Node.js 18+ 
+- Chrome browser
+- Supabase account
 
 ### 1. Clone and Install
-
 ```bash
 git clone <your-repo-url>
-cd screenTime
+cd screenly
 npm install
 ```
 
-### 2. Set Up Supabase
-
-1. **Follow the complete setup guide**: [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
-2. **Create your environment file**:
-   ```bash
-   cp env.example .env
-   # Edit .env with your Supabase credentials
-   ```
-
-### 3. Run the Application
-
-```bash
-# Development mode
-npm run dev
-
-# Build for production
-npm run build
+### 2. Environment Setup
+Create `.env` file in `apps/website/`:
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-## 🔐 Authentication Flow
+### 3. Supabase Setup
+1. Create a new Supabase project
+2. Run the SQL schema from `SUPABASE_SETUP.md`
+3. Enable authentication in Supabase dashboard
+4. Copy your project URL and anon key to `.env`
 
-- **Unauthenticated users**: Can access the timer page
-- **Authenticated users**: Full access to dashboard and analytics
-- **Login/Signup**: Email + password authentication via Supabase
-- **Protected Routes**: Dashboard requires authentication
+### 4. Build Extension
+```bash
+npm run build:extension
+```
+
+### 5. Load Extension in Chrome
+1. Go to `chrome://extensions/`
+2. Enable "Developer mode"
+3. Click "Load unpacked"
+4. Select `apps/extension/dist/`
+
+## 🚀 Development
+
+### Start Website
+```bash
+npm run dev:website
+# or
+npm run dev
+```
+
+### Build for Production
+```bash
+npm run build:website
+npm run build:extension
+```
+
+## 📊 How It Works
+
+### Extension Tracking
+- **Active Detection**: Only tracks when Chrome is focused, tab is visible, and user is not idle
+- **Minute Granularity**: Records time in 1-minute intervals
+- **Domain Categorization**: Automatically categorizes websites (Work, Social, Entertainment, etc.)
+- **Privacy First**: All data stored locally, no external tracking
+
+### Dashboard Features
+- **Authentication**: Secure login/signup with Supabase
+- **Timer Management**: Start/stop timers for custom activities
+- **Analytics**: Four main chart types:
+  - Average Daily Time (line chart)
+  - Most Used Time (radar chart) 
+  - Best Performances (metric cards)
+  - Progress Tracking (progress bars)
+- **Data Export/Import**: JSON backup and restore
+
+## 🔐 Privacy & Security
+
+- **Local Storage**: Extension data stored locally in Chrome
+- **Row Level Security**: Database access restricted to authenticated users
+- **No External Tracking**: All analytics computed from local data
+- **User Control**: Full control over data export and deletion
 
 ## 📱 Usage
 
-### For Unauthenticated Users
-1. Visit `/timer` to use the time tracker
-2. Click "Sign Up" to create an account
-3. Or click "Sign In" if you already have an account
-
-### For Authenticated Users
-1. **Dashboard** (`/dashboard`): View analytics and manage sessions
-2. **Timer** (`/timer`): Track new time sessions
-3. **Navigation**: Use the header to switch between pages
-4. **Logout**: Click "Sign Out" in the header
-
-## 🛠️ Development
-
-### Prerequisites
-- Node.js 18+
-- npm or yarn
-- Chrome browser (for extension testing)
-
-### Available Scripts
-
-```bash
-# Root level
-npm run dev          # Start website in development mode
-npm run build        # Build website for production
-npm run dev:ext      # Build extension in watch mode
-
-# Extension specific
-cd apps/extension
-npm run build        # Build extension
-npm run watch        # Watch mode for development
-
-# Website specific
-cd apps/website
-npm run dev          # Start Vite dev server
-npm run build        # Build for production
-npm run preview      # Preview production build
-```
-
-### Environment Variables
-
-Create a `.env` file in the project root:
-
-```bash
-# Required for Supabase authentication
-VITE_SUPABASE_URL=https://your-project-id.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key-here
-
-# Optional
-VITE_APP_NAME=ScreenTime
-NODE_ENV=development
-```
-
-## 🔧 Configuration
-
-### Supabase Setup
-Detailed instructions are in [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
-
-### Extension Configuration
-- Update `apps/extension/manifest.json` for extension metadata
-- Modify `apps/extension/src/background.js` for tracking logic
-- Customize `apps/extension/options.html` for settings
-
-### Website Configuration
-- Update `apps/website/vite.config.js` for build settings
-- Modify `apps/website/tailwind.config.js` for styling
-- Customize components in `apps/website/src/components/`
-
-## 📊 Data Structure
-
-### Screen Time Events
-```typescript
-interface MinuteEvent {
-  timestamp: string;
-  domain: string;
-  url: string;
-  category: string;
-}
-```
-
-### Daily Aggregates
-```typescript
-interface DailyAggregate {
-  dayKey: string;
-  totalMinutes: number;
-  byCategory: Record<string, number>;
-  byDomainTop: Array<{domain: string, minutes: number}>;
-  focusRatio: number;
-}
-```
-
-## 🎨 UI Components
-
-- **KpiCard**: Display key metrics with sparklines
-- **StackedBarsByDay**: Daily activity visualization
-- **DonutByCategory**: Category breakdown chart
-- **NavigationHeader**: User navigation and authentication
-- **TimerPanel**: Time tracking interface
-
-## 🔒 Security
-
-- **Row Level Security (RLS)** enabled on all tables
-- **User isolation**: Users can only access their own data
-- **Secure authentication** via Supabase Auth
-- **Environment variables** for sensitive configuration
-
-## 🚀 Deployment
-
-### Website
-```bash
-npm run build
-# Deploy dist/ folder to your hosting provider
-```
-
 ### Extension
-```bash
-cd apps/extension
-npm run build
-# Load dist/ folder as unpacked extension in Chrome
-```
+1. Install and enable the extension
+2. Browse normally - tracking happens automatically
+3. Use options page to export data ranges (Today/7d/30d)
+
+### Dashboard
+1. Sign up/login with email
+2. Create activities and start timers
+3. View analytics and productivity insights
+4. Export/import your data
+
+## 🎨 Customization
+
+### Themes
+- Dark theme with purple accent colors
+- Responsive design (1440x900 optimized)
+- Smooth animations and transitions
+
+### Charts
+- Custom D3.js implementations
+- Responsive SVG graphics
+- Interactive hover effects
+
+## 🐛 Troubleshooting
+
+### Common Issues
+- **"Supabase not configured"**: Check `.env` file and restart dev server
+- **Extension not tracking**: Ensure permissions are granted in Chrome
+- **Charts not loading**: Check browser console for errors
+
+### Debug Mode
+Enable console logging in browser dev tools to see detailed tracking information.
+
+## 📈 Roadmap
+
+- [ ] Team leaderboards and comparisons
+- [ ] Mobile app companion
+- [ ] Advanced analytics and insights
+- [ ] Integration with productivity tools
+- [ ] API for third-party integrations
 
 ## 🤝 Contributing
 
@@ -189,16 +158,17 @@ npm run build
 4. Test thoroughly
 5. Submit a pull request
 
-## 📝 License
+## 📄 License
 
-This project is licensed under the MIT License.
+MIT License - see LICENSE file for details
 
 ## 🆘 Support
 
-- **Documentation**: Check [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed setup
-- **Issues**: Open an issue on GitHub
-- **Questions**: Check the documentation or open a discussion
+For issues and questions:
+1. Check the troubleshooting section
+2. Review Supabase setup documentation
+3. Open an issue on GitHub
 
 ---
 
-**Happy Time Tracking! ⏰**
+**Screenly** - Track smarter, work better. 🚀

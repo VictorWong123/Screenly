@@ -38,7 +38,7 @@ const LoginPage = () => {
                     <div className="bg-zinc-800/50 backdrop-blur-sm rounded-xl border border-zinc-700/50 p-8">
                         <div className="text-center mb-8">
                             <h1 className="text-3xl font-bold text-zinc-100 mb-2">
-                                {isSignUp ? 'Create Account' : 'Welcome Back'}
+                                {isSignUp ? 'Screenly - Create Account' : 'Screenly - Welcome Back'}
                             </h1>
                             <p className="text-zinc-400">
                                 {isSignUp ? 'Start tracking your productivity today' : 'Sign in to continue'}
