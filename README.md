@@ -1,21 +1,20 @@
-# Screenly - Smart Screen Time Tracking
+# Screenly - Smart Productivity Tracking
 
-A comprehensive productivity tracking solution with a Chrome extension for active screen time monitoring and a React dashboard for insights and analytics.
+A comprehensive productivity tracking solution with manual time tracking and beautiful analytics dashboard.
 
 ## 🚀 Features
 
-- **Chrome Extension (MV3)**: Tracks active screen time per domain with intelligent focus detection
+- **Manual Timer System**: Start/stop timers for custom activities and projects
 - **React Dashboard**: Beautiful dark-themed interface with D3.js charts and analytics
 - **Supabase Integration**: User authentication and data persistence
-- **Timer System**: Manual time tracking for activities and projects
 - **Real-time Analytics**: Daily, weekly, and monthly productivity insights
+- **Activity Management**: Organize activities by categories with search and grouping
 
 ## 🏗️ Architecture
 
 ```
 screenly/
 ├── apps/
-│   ├── extension/          # Chrome MV3 extension
 │   └── website/           # React + Vite + Tailwind + D3 dashboard
 └── packages/
     └── shared/            # Shared utilities and types
@@ -23,7 +22,6 @@ screenly/
 
 ## 🛠️ Tech Stack
 
-- **Extension**: Chrome MV3, Vanilla JavaScript
 - **Website**: React 18, Vite, Tailwind CSS, D3.js
 - **Backend**: Supabase (Auth, Database)
 - **Database**: PostgreSQL with Row Level Security
@@ -33,7 +31,6 @@ screenly/
 
 ### Prerequisites
 - Node.js 18+ 
-- Chrome browser
 - Supabase account
 
 ### 1. Clone and Install
@@ -56,43 +53,34 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 3. Enable authentication in Supabase dashboard
 4. Copy your project URL and anon key to `.env`
 
-### 4. Build Extension
-```bash
-npm run build:extension
-```
-
-### 5. Load Extension in Chrome
-1. Go to `chrome://extensions/`
-2. Enable "Developer mode"
-3. Click "Load unpacked"
-4. Select `apps/extension/dist/`
-
 ## 🚀 Development
 
 ### Start Website
 ```bash
-npm run dev:website
-# or
 npm run dev
 ```
 
 ### Build for Production
 ```bash
-npm run build:website
-npm run build:extension
+npm run build
+```
+
+### Preview Production Build
+```bash
+npm run preview
 ```
 
 ## 📊 How It Works
 
-### Extension Tracking
-- **Active Detection**: Only tracks when Chrome is focused, tab is visible, and user is not idle
-- **Minute Granularity**: Records time in 1-minute intervals
-- **Domain Categorization**: Automatically categorizes websites (Work, Social, Entertainment, etc.)
-- **Privacy First**: All data stored locally, no external tracking
+### Timer System
+- **Manual Tracking**: Start/stop timers for any activity
+- **Category Organization**: Group activities by work, study, exercise, etc.
+- **Search Functionality**: Quickly find specific activities
+- **Time Continuation**: Resume timers from where you left off
+- **Daily/Weekly Tracking**: Monitor time spent per activity over time
 
 ### Dashboard Features
 - **Authentication**: Secure login/signup with Supabase
-- **Timer Management**: Start/stop timers for custom activities
 - **Analytics**: Four main chart types:
   - Average Daily Time (line chart)
   - Most Used Time (radar chart) 
@@ -102,23 +90,32 @@ npm run build:extension
 
 ## 🔐 Privacy & Security
 
-- **Local Storage**: Extension data stored locally in Chrome
+- **User Authentication**: Secure login with Supabase
 - **Row Level Security**: Database access restricted to authenticated users
-- **No External Tracking**: All analytics computed from local data
+- **Data Ownership**: Users only access their own data
 - **User Control**: Full control over data export and deletion
 
 ## 📱 Usage
 
-### Extension
-1. Install and enable the extension
-2. Browse normally - tracking happens automatically
-3. Use options page to export data ranges (Today/7d/30d)
-
-### Dashboard
+### Getting Started
 1. Sign up/login with email
-2. Create activities and start timers
-3. View analytics and productivity insights
-4. Export/import your data
+2. Create activities and organize them by category
+3. Start timers when you begin working on tasks
+4. Stop timers when you're done
+5. View analytics and productivity insights
+
+### Timer Management
+- **Start Timer**: Click "Start Timer" for any activity
+- **Stop Timer**: Click "Stop Timer" to end the session
+- **Continue Timer**: Resume previous sessions with "Continue"
+- **Search Activities**: Use the search bar to find specific activities
+- **Category Groups**: Click category headers to expand/collapse groups
+
+### Dashboard Analytics
+- **Time Overview**: See total time spent on activities
+- **Performance Metrics**: Track productivity trends
+- **Category Breakdown**: Understand time distribution
+- **Progress Tracking**: Monitor goals and achievements
 
 ## 🎨 Customization
 
@@ -136,19 +133,21 @@ npm run build:extension
 
 ### Common Issues
 - **"Supabase not configured"**: Check `.env` file and restart dev server
-- **Extension not tracking**: Ensure permissions are granted in Chrome
 - **Charts not loading**: Check browser console for errors
+- **Authentication issues**: Verify Supabase settings
 
 ### Debug Mode
-Enable console logging in browser dev tools to see detailed tracking information.
+Enable console logging in browser dev tools to see detailed information.
 
 ## 📈 Roadmap
 
-- [ ] Team leaderboards and comparisons
+- [ ] Team collaboration features
 - [ ] Mobile app companion
 - [ ] Advanced analytics and insights
 - [ ] Integration with productivity tools
 - [ ] API for third-party integrations
+- [ ] Time blocking and scheduling
+- [ ] Goal setting and tracking
 
 ## 🤝 Contributing
 

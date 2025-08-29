@@ -14,7 +14,7 @@ const LandingPage = () => {
                         Screenly
                     </h1>
                     <p className="text-xl text-zinc-400 mb-8">
-                        Track smarter, work better. Monitor your productivity with intelligent screen time analytics.
+                        Track your productivity with intelligent manual time tracking and beautiful analytics
                     </p>
 
                     {user ? (
@@ -30,7 +30,7 @@ const LandingPage = () => {
                                 href="/timer"
                                 className="inline-block bg-zinc-700 hover:bg-zinc-600 text-zinc-100 px-8 py-4 rounded-lg font-medium text-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
                             >
-                                Open Timer
+                                Start Timer
                             </a>
                         </div>
                     ) : (

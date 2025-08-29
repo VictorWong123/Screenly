@@ -7,9 +7,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:website": "cd apps/website && npm run dev",
-    "build:website": "cd apps/website && npm run build",
-    "build:extension": "cd apps/extension && npm run build",
-    "dev": "cd apps/website && npm run dev"
+    "dev": "cd apps/website && npm run dev",
+    "build": "cd apps/website && npm run build",
+    "preview": "cd apps/website && npm run preview"
   }
 }

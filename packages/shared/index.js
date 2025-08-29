@@ -1,24 +1,5 @@
 // Screenly - Shared Utilities
-// Common functions for domain categorization, time formatting, and date calculations
-
-/**
- * Categorize a domain into productivity categories
- * @param {string} domain - The domain to categorize
- * @returns {string} The category (Work, Social, Entertainment, Utilities, Other)
- */
-export function categorizeDomain(domain) {
-    const workDomains = ['github.com', 'stackoverflow.com', 'figma.com', 'notion.so', 'slack.com', 'linear.app'];
-    const socialDomains = ['twitter.com', 'x.com', 'instagram.com', 'tiktok.com', 'reddit.com', 'facebook.com'];
-    const entertainmentDomains = ['youtube.com', 'netflix.com', 'twitch.tv', 'spotify.com'];
-    const utilityDomains = ['gmail.com', 'google.com', 'calendar.google.com', 'docs.google.com'];
-
-    if (workDomains.some(d => domain.includes(d))) return 'Work';
-    if (socialDomains.some(d => domain.includes(d))) return 'Social';
-    if (entertainmentDomains.some(d => domain.includes(d))) return 'Entertainment';
-    if (utilityDomains.some(d => domain.includes(d))) return 'Utilities';
-
-    return 'Other';
-}
+// Common functions for time formatting and date calculations
 
 /**
  * Format minutes into human-readable time
@@ -35,19 +16,6 @@ export function formatMinutes(minutes) {
         return `${hours}h`;
     }
     return `${hours}h ${remainingMinutes}m`;
-}
-
-/**
- * Extract domain from URL
- * @param {string} url - The URL to extract domain from
- * @returns {string} The domain
- */
-export function getDomainFromUrl(url) {
-    try {
-        return new URL(url).hostname;
-    } catch {
-        return url;
-    }
 }
 
 /**
