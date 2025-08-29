@@ -35,7 +35,7 @@ screenly/
 
 ### 1. Clone and Install
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/VictorWong123/Screenly.git
 cd screenly
 npm install
 ```
@@ -117,18 +117,6 @@ npm run preview
 - **Category Breakdown**: Understand time distribution
 - **Progress Tracking**: Monitor goals and achievements
 
-## 🎨 Customization
-
-### Themes
-- Dark theme with purple accent colors
-- Responsive design (1440x900 optimized)
-- Smooth animations and transitions
-
-### Charts
-- Custom D3.js implementations
-- Responsive SVG graphics
-- Interactive hover effects
-
 ## 🐛 Troubleshooting
 
 ### Common Issues
@@ -139,23 +127,7 @@ npm run preview
 ### Debug Mode
 Enable console logging in browser dev tools to see detailed information.
 
-## 📈 Roadmap
 
-- [ ] Team collaboration features
-- [ ] Mobile app companion
-- [ ] Advanced analytics and insights
-- [ ] Integration with productivity tools
-- [ ] API for third-party integrations
-- [ ] Time blocking and scheduling
-- [ ] Goal setting and tracking
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
 
 ## 📄 License
 
