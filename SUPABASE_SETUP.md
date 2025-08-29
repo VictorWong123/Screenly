@@ -1,183 +1,197 @@
-# 🚀 Supabase Setup Guide for ScreenTime
+# Supabase Setup for ScreenTime App
 
-This guide will help you set up Supabase for authentication and data storage in your ScreenTime app.
-
-## 📋 Prerequisites
-
-- A Supabase account (free at [supabase.com](https://supabase.com))
-- Your ScreenTime project ready
-
-## 🏗️ Step 1: Create Supabase Project
-
-1. Go to [supabase.com](https://supabase.com) and sign in
-2. Click **"New Project"**
-3. Choose your organization
-4. Enter project details:
-   - **Name**: `screen-time` (or whatever you prefer)
-   - **Database Password**: Generate a strong password (save it!)
-   - **Region**: Choose closest to you
-5. Click **"Create new project"**
-6. Wait for the project to be ready (2-3 minutes)
-
-## 🗄️ Step 2: Set Up Database Schema
-
-Go to your Supabase project dashboard → **SQL Editor** and run this complete schema:
+## 🚀 **Quick Setup (Copy & Paste All)**
 
 ```sql
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- Create user profiles table
-CREATE TABLE public.user_profiles (
+CREATE TABLE IF NOT EXISTS public.user_profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
-  display_name TEXT,
-  avatar_url TEXT,
+  email TEXT UNIQUE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create screen time aggregates table
-CREATE TABLE public.screen_time_aggregates (
+-- Create activities table for user-defined activities
+CREATE TABLE IF NOT EXISTS public.activities (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE NOT NULL,
-  day_key TEXT NOT NULL,
-  total_minutes INTEGER NOT NULL,
-  by_category JSONB NOT NULL,
-  by_domain_top JSONB NOT NULL,
-  focus_ratio DECIMAL(5,2) NOT NULL,
+  name TEXT NOT NULL,
+  category TEXT,
+  color TEXT DEFAULT '#3B82F6',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(user_id, day_key)
+  UNIQUE(user_id, name)
 );
 
--- Enable Row Level Security
-ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.screen_time_aggregates ENABLE ROW LEVEL SECURITY;
+-- Create timer sessions table to track time spent on activities
+CREATE TABLE IF NOT EXISTS public.timer_sessions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE NOT NULL,
+  activity_id UUID REFERENCES public.activities(id) ON DELETE CASCADE NOT NULL,
+  started_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  ended_at TIMESTAMP WITH TIME ZONE,
+  duration_minutes INTEGER,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
--- Create RLS policies for user_profiles
+-- Create current timer table to track which activity is currently running
+CREATE TABLE IF NOT EXISTS public.current_timers (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE NOT NULL,
+  activity_id UUID REFERENCES public.activities(id) ON DELETE CASCADE NOT NULL,
+  started_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id)
+);
+
+-- Create screen time tracking table (for future Chrome extension integration)
+CREATE TABLE IF NOT EXISTS public.screen_time_events (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE NOT NULL,
+  domain TEXT,
+  url TEXT,
+  title TEXT,
+  started_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  ended_at TIMESTAMP WITH TIME ZONE,
+  duration_minutes INTEGER,
+  activity_id UUID REFERENCES public.activities(id), -- Optional link to user activity
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create daily screen time aggregates
+CREATE TABLE IF NOT EXISTS public.daily_screen_time (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE NOT NULL,
+  date_key TEXT NOT NULL, -- Format: YYYY-MM-DD
+  total_minutes INTEGER DEFAULT 0,
+  domains JSONB, -- Store domain breakdown
+  activities JSONB, -- Store activity breakdown
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, date_key)
+);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.timer_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.current_timers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.screen_time_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.daily_screen_time ENABLE ROW LEVEL SECURITY;
+
+-- Create RLS policies
 CREATE POLICY "Users can view own profile" ON public.user_profiles
   FOR SELECT USING (auth.uid() = id);
 
 CREATE POLICY "Users can update own profile" ON public.user_profiles
   FOR UPDATE USING (auth.uid() = id);
 
-CREATE POLICY "Users can insert own profile" ON public.user_profiles
-  FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Users can manage own activities" ON public.activities
+  FOR ALL USING (auth.uid() = user_id);
 
--- Create RLS policies for screen_time_aggregates
-CREATE POLICY "Users can view own aggregates" ON public.screen_time_aggregates
-  FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own timer sessions" ON public.timer_sessions
+  FOR ALL USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert own aggregates" ON public.screen_time_aggregates
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can manage own current timer" ON public.current_timers
+  FOR ALL USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own aggregates" ON public.screen_time_aggregates
-  FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own screen time events" ON public.screen_time_events
+  FOR ALL USING (auth.uid() = user_id);
 
--- Create indexes for better performance
-CREATE INDEX idx_user_profiles_username ON public.user_profiles(username);
-CREATE INDEX idx_aggregates_user_day ON public.screen_time_aggregates(user_id, day_key);
-CREATE INDEX idx_aggregates_day_key ON public.screen_time_aggregates(day_key);
+CREATE POLICY "Users can manage own daily screen time" ON public.daily_screen_time
+  FOR ALL USING (auth.uid() = user_id);
 
--- Create leaderboard view
-CREATE VIEW public.leaderboard AS
-SELECT 
-  up.username,
-  up.display_name,
-  up.avatar_url,
-  COALESCE(SUM(sta.total_minutes), 0) as total_minutes,
-  COALESCE(AVG(sta.focus_ratio), 0) as avg_focus_ratio,
-  COUNT(DISTINCT sta.day_key) as active_days
-FROM public.user_profiles up
-LEFT JOIN public.screen_time_aggregates sta ON up.id = sta.user_id
-WHERE sta.day_key >= TO_CHAR(CURRENT_DATE - INTERVAL '30 days', 'YYYY-MM-DD') OR sta.day_key IS NULL
-GROUP BY up.id, up.username, up.display_name, up.avatar_url
-ORDER BY total_minutes DESC;
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_activities_user_id ON public.activities(user_id);
+CREATE INDEX IF NOT EXISTS idx_timer_sessions_user_id ON public.timer_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_timer_sessions_started_at ON public.timer_sessions(started_at);
+CREATE INDEX IF NOT EXISTS idx_current_timers_user_id ON public.current_timers(user_id);
+CREATE INDEX IF NOT EXISTS idx_screen_time_events_user_id ON public.screen_time_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_screen_time_events_started_at ON public.screen_time_events(started_at);
+CREATE INDEX IF NOT EXISTS idx_daily_screen_time_user_id ON public.daily_screen_time(user_id);
+CREATE INDEX IF NOT EXISTS idx_daily_screen_time_date_key ON public.daily_screen_time(date_key);
+
+-- Create function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Create triggers for updated_at
+CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON public.user_profiles
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_activities_updated_at BEFORE UPDATE ON public.activities
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_daily_screen_time_updated_at BEFORE UPDATE ON public.daily_screen_time
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
-## 🔑 Step 3: Enable Authentication
+## 🔧 **Environment Variables**
 
-1. Go to **Authentication** → **Settings** in your Supabase dashboard
-2. **Enable Email Authentication**:
-   - Go to **Auth** → **Providers** → **Email**
-   - Make sure **Enable email confirmations** is turned ON
-   - Set **Site URL** to `http://localhost:3000` (for development)
-3. **Optional**: Enable other providers (Google, GitHub, etc.) if you want
-
-## 🔑 Step 4: Get Your API Keys
-
-1. Go to **Settings** → **API** in your Supabase dashboard
-2. Copy these values:
-   - **Project URL** (looks like: `https://abcdefghijklmnop.supabase.co`)
-   - **anon public** key (starts with `eyJ...`)
-
-## 📝 Step 5: Create Environment File
-
-Create a `.env` file in your project root:
+Make sure your `.env` file in `apps/website/` contains:
 
 ```bash
-# Supabase Configuration
-VITE_SUPABASE_URL=https://your-project-id.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key-here
-
-# Optional
-VITE_APP_NAME=ScreenTime
-NODE_ENV=development
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-## 📦 Step 6: Install Supabase Client
+## 📊 **Data Structure Explanation**
 
-Run this command in your project root:
+### **Timer Sessions** (`timer_sessions`)
+- **started_at**: When the timer started (timestamp)
+- **ended_at**: When the timer ended (timestamp)
+- **duration_minutes**: Total time spent (calculated)
+- **activity_id**: Links to user's custom activity
 
-```bash
-npm install @supabase/supabase-js
-```
+### **Screen Time Events** (`screen_time_events`)
+- **started_at**: When screen time started (timestamp)
+- **ended_at**: When screen time ended (timestamp)
+- **duration_minutes**: Time spent on that domain/URL
+- **domain**: Website domain (e.g., "github.com")
+- **url**: Full URL
+- **title**: Page title
+- **activity_id**: Optional link to user activity
 
-## 🧪 Step 7: Test Your Setup
+### **Daily Aggregates** (`daily_screen_time`)
+- **date_key**: Date in YYYY-MM-DD format
+- **total_minutes**: Total screen time for the day
+- **domains**: JSON breakdown by domain
+- **activities**: JSON breakdown by activity
 
-### Test 1: Database Schema
+## 🚀 **How to Execute**
+
+1. **Go to Supabase Dashboard** → SQL Editor
+2. **Copy the entire SQL block above**
+3. **Paste and run** in the SQL Editor
+4. **Verify tables** are created in the Table Editor
+
+## ✅ **Verification Queries**
+
 ```sql
 -- Check if tables exist
 SELECT table_name FROM information_schema.tables 
 WHERE table_schema = 'public' 
-AND table_name IN ('user_profiles', 'screen_time_aggregates', 'leaderboard');
+AND table_name IN ('user_profiles', 'activities', 'timer_sessions', 'current_timers', 'screen_time_events', 'daily_screen_time');
+
+-- Check RLS policies
+SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual 
+FROM pg_policies 
+WHERE schemaname = 'public';
 ```
 
-### Test 2: Authentication
-1. Go to your Supabase dashboard → **Authentication** → **Users**
-2. Try creating a test user manually
-3. Check that the user appears in both `auth.users` and `public.user_profiles`
+## 🔗 **Next Steps**
 
-### Test 3: RLS Policies
-```sql
--- Test that RLS is working (should return empty for non-authenticated users)
-SELECT * FROM public.user_profiles;
-SELECT * FROM public.screen_time_aggregates;
-```
-
-## 🆘 Troubleshooting
-
-### Common SQL Errors
-
-- **"must be owner of table users"**: Don't modify `auth.users` table - it's managed by Supabase
-- **"relation does not exist"**: Make sure you're in the correct schema (public)
-- **"permission denied"**: Check that you're running SQL as the postgres user
-- **"leaderboard is not a table"**: Run the SQL in the correct order (tables first, then views)
-
-### Other Issues
-
-- **Connection Issues**: Check your Supabase URL and keys
-- **RLS Errors**: Verify your database policies are correct
-- **Auth Problems**: Ensure your auth settings are configured
-- **CORS Issues**: Check your Supabase project settings
-
-## 🎯 Next Steps
-
-Once your Supabase setup is complete:
-
-1. **Update your React app** to use Supabase authentication
-2. **Connect your Chrome extension** to sync data with Supabase
-3. **Implement real-time features** using Supabase subscriptions
-4. **Add user profiles** and leaderboards
-
----
-
-**Need Help?** Check the [Supabase Documentation](https://supabase.com/docs) or open an issue in your repository.
+After running this SQL:
+1. The app will automatically create user profiles on signup
+2. Timer data will be stored in Supabase
+3. Dashboard will show real data from your database
+4. Ready for Chrome extension integration

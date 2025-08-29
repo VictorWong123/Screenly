@@ -7,10 +7,10 @@ const ProtectedRoute = ({ children, requireAuth = true }) => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+            <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-900 mx-auto mb-4"></div>
-                    <p className="text-zinc-600">Loading...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-100 mx-auto mb-4"></div>
+                    <p className="text-zinc-400">Loading...</p>
                 </div>
             </div>
         );

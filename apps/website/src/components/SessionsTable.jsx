@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 
 const SessionsTable = ({
     sessions = [],
-    projects = [],
-    categories = [],
+    activities = [],
     onEdit,
     onDelete
 }) => {
@@ -27,10 +26,8 @@ const SessionsTable = ({
         });
     };
 
-    const formatDuration = (start, end) => {
-        if (!end) return 'Running...';
-        const durationMs = new Date(end).getTime() - new Date(start).getTime();
-        const minutes = Math.round(durationMs / (1000 * 60));
+    const formatDuration = (minutes) => {
+        if (!minutes) return '0m';
 
         if (minutes < 60) {
             return `${minutes}m`;
@@ -43,17 +40,22 @@ const SessionsTable = ({
         return `${hours}h ${remainingMinutes}m`;
     };
 
-    const getProjectName = (projectId) => {
-        const project = projects.find(p => p.id === projectId);
-        return project ? project.name : 'No project';
+    const getActivityName = (activityId) => {
+        const activity = activities.find(a => a.id === activityId);
+        return activity ? activity.name : 'Unknown Activity';
+    };
+
+    const getActivityCategory = (activityId) => {
+        const activity = activities.find(a => a.id === activityId);
+        return activity ? activity.category : 'No category';
     };
 
     const handleEdit = (session) => {
         setEditingId(session.id);
         setEditData({
-            projectId: session.projectId || '',
-            category: session.category || '',
-            note: session.note || ''
+            started_at: session.started_at,
+            ended_at: session.ended_at,
+            activity_id: session.activity_id
         });
     };
 
@@ -76,9 +78,8 @@ const SessionsTable = ({
 
     if (sessions.length === 0) {
         return (
-            <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-zinc-800 mb-4">Sessions</h3>
-                <div className="text-center py-8 text-zinc-500">
+            <div className="p-6">
+                <div className="text-center py-8 text-zinc-400">
                     <p>No sessions found for this period.</p>
                     <p className="text-sm mt-1">Start a timer to create your first session.</p>
                 </div>
@@ -87,118 +88,110 @@ const SessionsTable = ({
     }
 
     return (
-        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-zinc-800 mb-4">Sessions</h3>
+        <div className="p-6">
 
             <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead>
-                        <tr className="border-b border-zinc-200">
-                            <th className="text-left py-3 px-2 font-medium text-zinc-600">Start</th>
-                            <th className="text-left py-3 px-2 font-medium text-zinc-600">End</th>
-                            <th className="text-left py-3 px-2 font-medium text-zinc-600">Duration</th>
-                            <th className="text-left py-3 px-2 font-medium text-zinc-600">Project</th>
-                            <th className="text-left py-3 px-2 font-medium text-zinc-600">Category</th>
-                            <th className="text-left py-3 px-2 font-medium text-zinc-600">Note</th>
-                            <th className="text-right py-3 px-2 font-medium text-zinc-600">Actions</th>
+                        <tr className="border-b border-zinc-700/50">
+                            <th className="text-left py-3 px-2 font-medium text-zinc-400">Start</th>
+                            <th className="text-left py-3 px-2 font-medium text-zinc-400">End</th>
+                            <th className="text-left py-3 px-2 font-medium text-zinc-400">Duration</th>
+                            <th className="text-left py-3 px-2 font-medium text-zinc-400">Activity</th>
+                            <th className="text-left py-3 px-2 font-medium text-zinc-400">Category</th>
+                            <th className="text-left py-3 px-2 font-medium text-zinc-400">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {sessions.map((session) => (
-                            <tr key={session.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                                <td className="py-3 px-2 text-zinc-800">
-                                    <div className="font-medium">{formatTime(session.start)}</div>
-                                    <div className="text-xs text-zinc-500">{formatDate(session.start)}</div>
-                                </td>
-                                <td className="py-3 px-2 text-zinc-800">
-                                    {session.end ? (
-                                        <>
-                                            <div className="font-medium">{formatTime(session.end)}</div>
-                                            <div className="text-xs text-zinc-500">{formatDate(session.end)}</div>
-                                        </>
-                                    ) : (
-                                        <span className="text-zinc-500 italic">Running...</span>
-                                    )}
-                                </td>
-                                <td className="py-3 px-2 text-zinc-800 font-medium">
-                                    {formatDuration(session.start, session.end)}
-                                </td>
-                                <td className="py-3 px-2 text-zinc-800">
-                                    {editingId === session.id ? (
-                                        <select
-                                            value={editData.projectId}
-                                            onChange={(e) => setEditData({ ...editData, projectId: e.target.value })}
-                                            className="w-full px-2 py-1 border border-zinc-300 rounded text-xs"
-                                        >
-                                            <option value="">No project</option>
-                                            {projects.map(project => (
-                                                <option key={project.id} value={project.id}>
-                                                    {project.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    ) : (
-                                        getProjectName(session.projectId)
-                                    )}
-                                </td>
-                                <td className="py-3 px-2 text-zinc-800">
-                                    {editingId === session.id ? (
-                                        <select
-                                            value={editData.category}
-                                            onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                                            className="w-full px-2 py-1 border border-zinc-300 rounded text-xs"
-                                        >
-                                            <option value="">No category</option>
-                                            {categories.map(category => (
-                                                <option key={category.id} value={category.name}>
-                                                    {category.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    ) : (
-                                        session.category || 'No category'
-                                    )}
-                                </td>
-                                <td className="py-3 px-2 text-zinc-800">
+                            <tr key={session.id} className="border-b border-zinc-700/30">
+                                <td className="py-3 px-2">
                                     {editingId === session.id ? (
                                         <input
-                                            type="text"
-                                            value={editData.note}
-                                            onChange={(e) => setEditData({ ...editData, note: e.target.value })}
-                                            className="w-full px-2 py-1 border border-zinc-300 rounded text-xs"
-                                            placeholder="Add note..."
+                                            type="datetime-local"
+                                            value={editData.started_at ? editData.started_at.slice(0, 16) : ''}
+                                            onChange={(e) => setEditData({ ...editData, started_at: e.target.value })}
+                                            className="bg-zinc-700/50 border border-zinc-600/50 rounded px-2 py-1 text-zinc-100 text-sm w-40"
                                         />
                                     ) : (
-                                        session.note || '-'
+                                        <div>
+                                            <div className="font-medium text-zinc-100">{formatTime(session.started_at)}</div>
+                                            <div className="text-xs text-zinc-400">{formatDate(session.started_at)}</div>
+                                        </div>
                                     )}
                                 </td>
-                                <td className="py-3 px-2 text-right">
+                                <td className="py-3 px-2">
                                     {editingId === session.id ? (
-                                        <div className="flex gap-1 justify-end">
+                                        <input
+                                            type="datetime-local"
+                                            value={editData.ended_at ? editData.ended_at.slice(0, 16) : ''}
+                                            onChange={(e) => setEditData({ ...editData, ended_at: e.target.value })}
+                                            className="bg-zinc-700/50 border border-zinc-600/50 rounded px-2 py-1 text-zinc-100 text-sm w-40"
+                                        />
+                                    ) : (
+                                        <div>
+                                            <div className="font-medium text-zinc-100">{formatTime(session.ended_at)}</div>
+                                            <div className="text-xs text-zinc-400">{formatDate(session.ended_at)}</div>
+                                        </div>
+                                    )}
+                                </td>
+                                <td className="py-3 px-2">
+                                    <div className="text-zinc-300">
+                                        {formatDuration(session.duration_minutes)}
+                                    </div>
+                                </td>
+                                <td className="py-3 px-2">
+                                    {editingId === session.id ? (
+                                        <select
+                                            value={editData.activity_id || session.activity_id || ''}
+                                            onChange={(e) => setEditData({ ...editData, activity_id: e.target.value })}
+                                            className="bg-zinc-700/50 border border-zinc-600/50 rounded px-2 py-1 text-zinc-100 text-sm"
+                                        >
+                                            <option value="">Select activity</option>
+                                            {activities.map(activity => (
+                                                <option key={activity.id} value={activity.id}>
+                                                    {activity.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <div className="text-zinc-300">
+                                            {getActivityName(session.activity_id)}
+                                        </div>
+                                    )}
+                                </td>
+                                <td className="py-3 px-2">
+                                    <div className="text-zinc-300">
+                                        {getActivityCategory(session.activity_id)}
+                                    </div>
+                                </td>
+                                <td className="py-3 px-2">
+                                    {editingId === session.id ? (
+                                        <div className="flex space-x-2">
                                             <button
                                                 onClick={() => handleSave(session.id)}
-                                                className="px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
+                                                className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
                                             >
                                                 Save
                                             </button>
                                             <button
                                                 onClick={handleCancel}
-                                                className="px-2 py-1 bg-zinc-500 text-white rounded text-xs hover:bg-zinc-600"
+                                                className="px-2 py-1 bg-zinc-600 text-white text-xs rounded hover:bg-zinc-700 transition-colors"
                                             >
                                                 Cancel
                                             </button>
                                         </div>
                                     ) : (
-                                        <div className="flex gap-1 justify-end">
+                                        <div className="flex space-x-2">
                                             <button
                                                 onClick={() => handleEdit(session)}
-                                                className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+                                                className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
                                             >
                                                 Edit
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(session.id)}
-                                                className="px-2 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700"
+                                                className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
                                             >
                                                 Delete
                                             </button>

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import NavigationHeader from '../components/NavigationHeader';
 
 const LoginPage = () => {
-    const [isLogin, setIsLogin] = useState(true);
+    const [isSignUp, setIsSignUp] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [username, setUsername] = useState('');
@@ -12,7 +11,6 @@ const LoginPage = () => {
     const [error, setError] = useState('');
 
     const { signIn, signUp } = useAuth();
-    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -20,95 +18,108 @@ const LoginPage = () => {
         setError('');
 
         try {
-            if (isLogin) {
-                await signIn(email, password);
-            } else {
+            if (isSignUp) {
                 await signUp(email, password, username);
+            } else {
+                await signIn(email, password);
             }
-            navigate('/dashboard');
-        } catch (err) {
-            setError(err.message);
+        } catch (error) {
+            setError(error.message);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-zinc-50">
+        <div className="min-h-screen bg-zinc-900 text-zinc-100">
             <NavigationHeader />
             <div className="flex items-center justify-center pt-20">
-                <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-                    <h1 className="text-2xl font-bold text-zinc-900 mb-6 text-center">Sign In to ScreenTime</h1>
-
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-                            {error}
+                <div className="max-w-md w-full mx-6">
+                    <div className="bg-zinc-800/50 backdrop-blur-sm rounded-xl border border-zinc-700/50 p-8">
+                        <div className="text-center mb-8">
+                            <h1 className="text-3xl font-bold text-zinc-100 mb-2">
+                                {isSignUp ? 'Create Account' : 'Welcome Back'}
+                            </h1>
+                            <p className="text-zinc-400">
+                                {isSignUp ? 'Start tracking your productivity today' : 'Sign in to continue'}
+                            </p>
                         </div>
-                    )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {!isLogin && (
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            {isSignUp && (
+                                <div>
+                                    <label htmlFor="username" className="block text-sm font-medium text-zinc-300 mb-2">
+                                        Username
+                                    </label>
+                                    <input
+                                        id="username"
+                                        type="text"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        required
+                                        className="w-full px-4 py-3 bg-zinc-700/50 border border-zinc-600/50 rounded-lg text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+                                        placeholder="Enter your username"
+                                        autoComplete="username"
+                                    />
+                                </div>
+                            )}
+
                             <div>
-                                <label className="block text-sm font-medium text-zinc-700 mb-1">
-                                    Username
+                                <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-2">
+                                    Email
                                 </label>
                                 <input
-                                    type="text"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    required={!isLogin}
-                                    autoComplete="username"
+                                    id="email"
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className="w-full px-4 py-3 bg-zinc-700/50 border border-zinc-600/50 rounded-lg text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+                                    placeholder="Enter your email"
+                                    autoComplete="email"
                                 />
                             </div>
-                        )}
 
-                        <div>
-                            <label className="block text-sm font-medium text-zinc-700 mb-1">
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required
-                                autoComplete="email"
-                            />
-                        </div>
+                            <div>
+                                <label htmlFor="password" className="block text-sm font-medium text-zinc-300 mb-2">
+                                    Password
+                                </label>
+                                <input
+                                    id="password"
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    className="w-full px-4 py-3 bg-zinc-700/50 border border-zinc-600/50 rounded-lg text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+                                    placeholder="Enter your password"
+                                    autoComplete="current-password"
+                                />
+                            </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-zinc-700 mb-1">
-                                Password
-                            </label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required
-                                autoComplete={isLogin ? "current-password" : "new-password"}
-                            />
-                        </div>
+                            {error && (
+                                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                                    <p className="text-red-400 text-sm">{error}</p>
+                                </div>
+                            )}
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                        >
-                            {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Sign Up')}
-                        </button>
-
-                        <div className="text-center">
                             <button
-                                type="button"
-                                onClick={() => setIsLogin(!isLogin)}
-                                className="text-blue-600 hover:text-blue-700 text-sm"
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-3 px-4 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+                                {loading ? 'Loading...' : (isSignUp ? 'Create Account' : 'Sign In')}
+                            </button>
+                        </form>
+
+                        <div className="mt-6 text-center">
+                            <button
+                                onClick={() => setIsSignUp(!isSignUp)}
+                                className="text-zinc-400 hover:text-zinc-300 text-sm transition-colors"
+                            >
+                                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

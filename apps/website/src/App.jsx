@@ -5,14 +5,14 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import TimerPage from './pages/TimerPage';
 import DashboardPage from './pages/DashboardPage';
-import DebugInfo from './components/DebugInfo';
+import LandingPage from './pages/LandingPage';
 
 const App = () => {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Navigate to="/timer" replace />} />
+          <Route path="/" element={<LandingPage />} />
           <Route
             path="/login"
             element={
@@ -24,7 +24,7 @@ const App = () => {
           <Route
             path="/timer"
             element={
-              <ProtectedRoute requireAuth={false}>
+              <ProtectedRoute requireAuth={true}>
                 <TimerPage />
               </ProtectedRoute>
             }
@@ -38,7 +38,6 @@ const App = () => {
             }
           />
         </Routes>
-        <DebugInfo />
       </Router>
     </AuthProvider>
   );
