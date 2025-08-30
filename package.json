@@ -10,5 +10,8 @@
     "dev": "cd apps/website && npm run dev",
     "build": "cd apps/website && npm run build",
     "preview": "cd apps/website && npm run preview"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1"
   }
 }

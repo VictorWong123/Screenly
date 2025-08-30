@@ -40,6 +40,14 @@ const NavigationHeader = () => {
                                 Dashboard
                             </Link>
                         )}
+                        {user && (
+                            <Link
+                                to="/leaderboard"
+                                className="text-zinc-300 hover:text-zinc-100 transition-colors"
+                            >
+                                Leaderboard
+                            </Link>
+                        )}
                     </nav>
 
                     {/* Auth Section */}

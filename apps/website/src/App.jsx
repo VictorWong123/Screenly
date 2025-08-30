@@ -5,6 +5,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import TimerPage from './pages/TimerPage';
 import DashboardPage from './pages/DashboardPage';
+import LeaderboardPage from './pages/LeaderboardPage';
+import UserProfilePage from './pages/UserProfilePage';
 import LandingPage from './pages/LandingPage';
 
 const App = () => {
@@ -34,6 +36,22 @@ const App = () => {
             element={
               <ProtectedRoute requireAuth={true}>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/leaderboard"
+            element={
+              <ProtectedRoute requireAuth={true}>
+                <LeaderboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/:userId"
+            element={
+              <ProtectedRoute requireAuth={true}>
+                <UserProfilePage />
               </ProtectedRoute>
             }
           />

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import NavigationHeader from '../components/NavigationHeader';
-import AverageDailyTimeChart from '../components/AverageDailyTimeChart';
-import MostUsedTimeChart from '../components/MostUsedTimeChart';
-import BestPerformancesChart from '../components/BestPerformancesChart';
-import ProgressChart from '../components/ProgressChart';
-import DonutChart from '../components/DonutChart';
+import {
+  AverageDailyTimeChart,
+  MostUsedTimeChart,
+  BestPerformancesChart,
+  ProgressChart,
+  DonutChart
+} from '../components/charts';
 import SessionsTable from '../components/SessionsTable';
 import Toolbar from '../components/Toolbar';
 

@@ -6,6 +6,7 @@ A comprehensive productivity tracking solution with manual time tracking and bea
 
 - **Manual Timer System**: Start/stop timers for custom activities and projects
 - **React Dashboard**: Beautiful dark-themed interface with D3.js charts and analytics
+- **Leaderboard System**: Compare productivity with other users across different time-based heats
 - **Supabase Integration**: User authentication and data persistence
 - **Real-time Analytics**: Daily, weekly, and monthly productivity insights
 - **Activity Management**: Organize activities by categories with search and grouping
@@ -16,6 +17,12 @@ A comprehensive productivity tracking solution with manual time tracking and bea
 screenly/
 ├── apps/
 │   └── website/           # React + Vite + Tailwind + D3 dashboard
+│       └── src/
+│           ├── components/
+│           │   ├── charts/     # D3.js chart components
+│           │   └── ...         # Other UI components
+│           ├── pages/          # Page components
+│           └── contexts/       # React contexts
 └── packages/
     └── shared/            # Shared utilities and types
 ```
@@ -70,6 +77,14 @@ npm run build
 npm run preview
 ```
 
+### Populate Database with Test Data
+
+**SQL Script:**
+1. Copy the contents of `create_dummy_users_fixed.sql`
+2. Paste it into your Supabase SQL editor
+3. Run the script to create 50 users with realistic data
+4. Run the RLS fix script to allow leaderboard access
+
 ## 📊 How It Works
 
 ### Timer System
@@ -116,6 +131,13 @@ npm run preview
 - **Performance Metrics**: Track productivity trends
 - **Category Breakdown**: Understand time distribution
 - **Progress Tracking**: Monitor goals and achievements
+
+### Leaderboard Features
+- **Heat-based Rankings**: Users are grouped into time-based heats (Sub 2h, 2-3h, 3-4h, etc.)
+- **7-day Averages**: Compare productivity based on weekly averages
+- **Projected Performance**: See projected vs actual time tracking
+- **User Comparison**: View rankings with user initials and performance metrics
+- **Grid/List Views**: Toggle between different viewing modes
 
 ## 🐛 Troubleshooting
 
