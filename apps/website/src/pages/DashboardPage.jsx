@@ -5,6 +5,7 @@ import AverageDailyTimeChart from '../components/AverageDailyTimeChart';
 import MostUsedTimeChart from '../components/MostUsedTimeChart';
 import BestPerformancesChart from '../components/BestPerformancesChart';
 import ProgressChart from '../components/ProgressChart';
+import DonutChart from '../components/DonutChart';
 import SessionsTable from '../components/SessionsTable';
 import Toolbar from '../components/Toolbar';
 
@@ -367,12 +368,6 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-zinc-900 text-zinc-100">
       <NavigationHeader />
       <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-zinc-100 mb-2">Screenly Dashboard</h1>
-          <p className="text-zinc-400">Track your productivity and time management</p>
-        </div>
-
         {/* Toolbar */}
         <Toolbar
           dateRange={dateRange}
@@ -391,8 +386,15 @@ const DashboardPage = () => {
             onRangeChange={setChartRange}
           />
           <MostUsedTimeChart data={chartData.mostUsedTime} />
-          <BestPerformancesChart data={chartData.bestPerformances} />
-          <ProgressChart data={chartData.progress} />
+        </div>
+
+        {/* Second Row - Donut Chart and Stacked Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <DonutChart activities={activities} sessions={sessions} />
+          <div className="space-y-6">
+            <BestPerformancesChart activities={activities} sessions={sessions} />
+            <ProgressChart data={chartData.progress} />
+          </div>
         </div>
 
         {/* Sessions Table */}

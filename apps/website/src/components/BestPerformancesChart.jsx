@@ -1,98 +1,90 @@
 import React from 'react';
 
-const BestPerformancesChart = ({ data }) => {
-    // Sample data structure - you can replace with real data
-    const chartData = data || {
-        bestTime: 30,
-        bestWeekAvg: 45,
-        yearAvg: 222, // in minutes
-        subOneHour: 12
-    };
+const formatMinutes = (minutes) => {
+    if (minutes < 60) {
+        return `${minutes}m`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (remainingMinutes === 0) {
+        return `${hours}h`;
+    }
+    return `${hours}h ${remainingMinutes}m`;
+};
 
-    // Helper function to format time in an intuitive way
+const BestPerformancesChart = ({ activities, sessions }) => {
     const formatTimeIntuitive = (minutes) => {
-        if (minutes < 60) {
-            return `${minutes}m`;
-        } else if (minutes < 1440) { // Less than 24 hours
-            const hours = Math.floor(minutes / 60);
-            const remainingMinutes = minutes % 60;
-            if (remainingMinutes === 0) {
-                return `${hours}h`;
-            }
-            return `${hours}h ${remainingMinutes}m`;
-        } else {
-            const days = Math.floor(minutes / 1440);
-            const remainingHours = Math.floor((minutes % 1440) / 60);
-            if (remainingHours === 0) {
-                return `${days}d`;
-            }
-            return `${days}d ${remainingHours}h`;
-        }
+        if (minutes < 60) return `${minutes}m`;
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        if (remainingMinutes === 0) return `${hours}h`;
+        return `${hours}h ${remainingMinutes}m`;
     };
 
-    const metrics = [
-        {
-            key: 'bestTime',
-            label: 'BEST TIME',
-            value: formatTimeIntuitive(chartData.bestTime),
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-            ),
-            color: 'text-yellow-400'
-        },
-        {
-            key: 'bestWeekAvg',
-            label: 'BEST WEEK AVG',
-            value: formatTimeIntuitive(chartData.bestWeekAvg),
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            ),
-            color: 'text-green-400'
-        },
-        {
-            key: 'yearAvg',
-            label: 'YEAR AVG',
-            value: formatTimeIntuitive(chartData.yearAvg),
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            ),
-            color: 'text-blue-400'
-        },
-        {
-            key: 'subOneHour',
-            label: 'SUB 1-HOUR',
-            value: chartData.subOneHour.toString(),
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-            ),
-            color: 'text-purple-400'
+    // Calculate most done activity
+    const activityTimes = {};
+    sessions.forEach(session => {
+        const activity = activities.find(a => a.id === session.activity_id);
+        if (activity) {
+            activityTimes[activity.id] = (activityTimes[activity.id] || 0) + session.duration_minutes;
         }
-    ];
+    });
+
+    const mostDoneActivity = activities.reduce((max, activity) => {
+        const time = activityTimes[activity.id] || 0;
+        const maxTime = activityTimes[max?.id] || 0;
+        return time > maxTime ? activity : max;
+    }, null);
+
+    const mostDoneTime = mostDoneActivity ? (activityTimes[mostDoneActivity.id] || 0) : 0;
+
+    // Calculate best day (most productive day)
+    const dailyTotals = {};
+    sessions.forEach(session => {
+        const date = new Date(session.started_at).toISOString().split('T')[0];
+        dailyTotals[date] = (dailyTotals[date] || 0) + session.duration_minutes;
+    });
+
+    const bestDay = Object.entries(dailyTotals).reduce((max, [date, time]) => {
+        return time > max.time ? { date, time } : max;
+    }, { date: null, time: 0 });
+
+    // Calculate average session length
+    const avgSessionLength = sessions.length > 0
+        ? sessions.reduce((sum, session) => sum + session.duration_minutes, 0) / sessions.length
+        : 0;
 
     return (
-        <div className="bg-zinc-800/50 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-zinc-700/50">
-            <h3 className="text-lg font-semibold text-zinc-100 mb-6">BEST PERFORMANCES</h3>
-
-            <div className="grid grid-cols-2 gap-4">
-                {metrics.map((metric) => (
-                    <div key={metric.key} className="flex items-center space-x-3 p-3 bg-zinc-700/30 rounded-lg border border-zinc-600/30">
-                        <div className={`${metric.color} bg-zinc-800/50 p-2 rounded-lg shadow-sm`}>
-                            {metric.icon}
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-zinc-400">{metric.label}</p>
-                            <p className="text-lg font-bold text-zinc-100">{metric.value}</p>
-                        </div>
+        <div className="bg-zinc-800/50 rounded-xl p-6 border border-zinc-700/50">
+            <h3 className="text-lg font-semibold text-zinc-100 mb-4">Best Performances</h3>
+            <div className="grid grid-cols-3 gap-4">
+                <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-400 mb-1">
+                        {mostDoneActivity ? mostDoneActivity.name : 'None'}
                     </div>
-                ))}
+                    <div className="text-sm text-zinc-400 mb-2">Most Done Activity</div>
+                    <div className="text-lg font-semibold text-zinc-100">
+                        {formatTimeIntuitive(mostDoneTime)}
+                    </div>
+                </div>
+                <div className="text-center">
+                    <div className="text-2xl font-bold text-green-400 mb-1">
+                        {bestDay.date ? new Date(bestDay.date).toLocaleDateString() : 'None'}
+                    </div>
+                    <div className="text-sm text-zinc-400 mb-2">Best Day</div>
+                    <div className="text-lg font-semibold text-zinc-100">
+                        {formatTimeIntuitive(bestDay.time)}
+                    </div>
+                </div>
+                <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-400 mb-1">
+                        {formatTimeIntuitive(Math.round(avgSessionLength))}
+                    </div>
+                    <div className="text-sm text-zinc-400 mb-2">Avg Session</div>
+                    <div className="text-lg font-semibold text-zinc-100">
+                        {sessions.length} sessions
+                    </div>
+                </div>
             </div>
         </div>
     );

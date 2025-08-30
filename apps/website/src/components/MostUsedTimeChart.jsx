@@ -20,8 +20,8 @@ const MostUsedTimeChart = ({ data }) => {
         { key: 'eightPM', label: '8 PM', angle: 300 }
     ];
 
-    const centerX = 100;
-    const centerY = 100;
+    const centerX = 200 / 2;
+    const centerY = 200 / 2;
     const radius = 60;
     const maxValue = Math.max(...Object.values(chartData));
 
