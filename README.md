@@ -15,16 +15,14 @@ A comprehensive productivity tracking solution with manual time tracking and bea
 
 ```
 screenly/
-├── apps/
-│   └── website/           # React + Vite + Tailwind + D3 dashboard
-│       └── src/
-│           ├── components/
-│           │   ├── charts/     # D3.js chart components
-│           │   └── ...         # Other UI components
-│           ├── pages/          # Page components
-│           └── contexts/       # React contexts
-└── packages/
-    └── shared/            # Shared utilities and types
+├── src/
+│   ├── components/
+│   │   ├── charts/     # D3.js chart components
+│   │   └── ...         # Other UI components
+│   ├── pages/          # Page components
+│   └── contexts/       # React contexts
+├── dist/               # Build output
+└── package.json        # Dependencies and scripts
 ```
 
 ## 🛠️ Tech Stack
@@ -48,7 +46,7 @@ npm install
 ```
 
 ### 2. Environment Setup
-Create `.env` file in `apps/website/`:
+Create `.env` file in the root directory:
 ```env
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
