@@ -7,6 +7,7 @@ import TimerPage from './pages/TimerPage';
 import DashboardPage from './pages/DashboardPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import UserProfilePage from './pages/UserProfilePage';
+import SettingsPage from './pages/SettingsPage';
 import LandingPage from './pages/LandingPage';
 
 const App = () => {
@@ -52,6 +53,14 @@ const App = () => {
             element={
               <ProtectedRoute requireAuth={true}>
                 <UserProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute requireAuth={true}>
+                <SettingsPage />
               </ProtectedRoute>
             }
           />

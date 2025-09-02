@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import NavigationHeader from '../components/NavigationHeader';
+import Layout from '../components/Layout';
 import {
   AverageDailyTimeChart,
   MostUsedTimeChart,
@@ -8,7 +8,7 @@ import {
   ProgressChart,
   DonutChart
 } from '../components/charts';
-import SessionsTable from '../components/SessionsTable';
+import RecentActivities from '../components/RecentActivities';
 import Toolbar from '../components/Toolbar';
 
 const DashboardPage = () => {
@@ -140,74 +140,8 @@ const DashboardPage = () => {
     }
   };
 
-  const handleEditSession = async (sessionId, updates) => {
-    try {
-      const { error } = await supabase
-        .from('timer_sessions')
-        .update(updates)
-        .eq('id', sessionId)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      // Reload sessions
-      await loadSessions(dateRange);
-    } catch (error) {
-      console.error('Error updating session:', error);
-      alert('Failed to update session');
-    }
-  };
-
-  const handleDeleteSession = async (sessionId) => {
-    if (!confirm('Are you sure you want to delete this session?')) return;
-
-    try {
-      const { error } = await supabase
-        .from('timer_sessions')
-        .delete()
-        .eq('id', sessionId)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      // Reload sessions
-      await loadSessions(dateRange);
-    } catch (error) {
-      console.error('Error deleting session:', error);
-      alert('Failed to delete session');
-    }
-  };
-
-  const updateSession = async (sessionId, updates) => {
-    try {
-      const { error } = await supabase
-        .from('timer_sessions')
-        .update(updates)
-        .eq('id', sessionId)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      return true;
-    } catch (error) {
-      console.error('Error updating session:', error);
-      return false;
-    }
-  };
-
-  const deleteSession = async (sessionId) => {
-    try {
-      const { error } = await supabase
-        .from('timer_sessions')
-        .delete()
-        .eq('id', sessionId)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      return true;
-    } catch (error) {
-      console.error('Error deleting session:', error);
-      return false;
-    }
+  const refreshSessions = async () => {
+    await loadSessions(dateRange);
   };
 
   const exportAll = async () => {
@@ -293,18 +227,7 @@ const DashboardPage = () => {
     }
   };
 
-  const handleImport = async (file) => {
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      await importAll(data);
-      await loadData();
-      alert('Import successful!');
-    } catch (error) {
-      console.error('Import failed:', error);
-      alert('Import failed. Please check your file and try again.');
-    }
-  };
+  // Removed Import JSON feature from toolbar and dashboard
 
   if (loading) {
     return (
@@ -367,52 +290,49 @@ const DashboardPage = () => {
   const chartData = generateChartData();
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-zinc-100">
-      <NavigationHeader />
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Toolbar */}
-        <Toolbar
+    <Layout>
+      <div className="">
+
+        {/* Charts Grid (original layout, slightly compacted ~10%) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6 w-[90%] mx-auto">
+          <div className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg p-3 overflow-visible min-h-[204px]">
+            <AverageDailyTimeChart
+              data={chartData.averageDailyTime}
+              currentRange={chartRange}
+              onRangeChange={setChartRange}
+            />
+          </div>
+          <div className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg p-3 overflow-visible min-h-[204px]">
+            <MostUsedTimeChart data={chartData.mostUsedTime} />
+          </div>
+        </div>
+
+        {/* Second Row - Donut + Right column (slightly compacted) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6 w-[90%] mx-auto">
+          <div className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg p-3 overflow-visible min-h-[221px]">
+            <DonutChart activities={activities} sessions={sessions} />
+          </div>
+          <div className="space-y-3">
+            <div className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg p-3 overflow-visible min-h-[204px]">
+              <BestPerformancesChart activities={activities} sessions={sessions} />
+            </div>
+            <div className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg p-3 overflow-visible min-h-[204px]">
+              <ProgressChart data={chartData.progress} />
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activities */}
+        <RecentActivities
+          user={user}
+          supabase={supabase}
+          sessions={sessions}
+          activities={activities}
+          onRefresh={refreshSessions}
           dateRange={dateRange}
-          setDateRange={setDateRange}
-          compareMode={compareMode}
-          setCompareMode={setCompareMode}
-          onExport={handleExport}
-          onImport={handleImport}
         />
-
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <AverageDailyTimeChart
-            data={chartData.averageDailyTime}
-            currentRange={chartRange}
-            onRangeChange={setChartRange}
-          />
-          <MostUsedTimeChart data={chartData.mostUsedTime} />
-        </div>
-
-        {/* Second Row - Donut Chart and Stacked Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <DonutChart activities={activities} sessions={sessions} />
-          <div className="space-y-6">
-            <BestPerformancesChart activities={activities} sessions={sessions} />
-            <ProgressChart data={chartData.progress} />
-          </div>
-        </div>
-
-        {/* Sessions Table */}
-        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700/50">
-          <div className="p-6 border-b border-zinc-700/50">
-            <h3 className="text-lg font-semibold text-zinc-100">Recent Sessions</h3>
-          </div>
-          <SessionsTable
-            sessions={sessions}
-            activities={activities}
-            onEdit={handleEditSession}
-            onDelete={handleDeleteSession}
-          />
-        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

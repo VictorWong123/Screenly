@@ -1,14 +1,13 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import NavigationHeader from '../components/NavigationHeader';
+import Layout from '../components/Layout';
 
 const LandingPage = () => {
     const { user } = useAuth();
 
     return (
-        <div className="min-h-screen bg-zinc-900 text-zinc-100">
-            <NavigationHeader />
-            <div className="max-w-4xl mx-auto p-6 pt-20">
+        <Layout>
+            <div className="max-w-4xl mx-auto p-10">
                 <div className="text-center">
                     <h1 className="text-6xl font-bold text-zinc-100 mb-6">
                         Screenly
@@ -52,7 +51,7 @@ const LandingPage = () => {
                     )}
                 </div>
             </div>
-        </div>
+        </Layout>
     );
 };
 

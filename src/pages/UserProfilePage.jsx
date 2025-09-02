@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import NavigationHeader from '../components/NavigationHeader';
+import Layout from '../components/Layout';
 import {
-  AverageDailyTimeChart,
-  MostUsedTimeChart,
-  BestPerformancesChart,
-  ProgressChart,
-  DonutChart
+    AverageDailyTimeChart,
+    MostUsedTimeChart,
+    BestPerformancesChart,
+    ProgressChart,
+    DonutChart
 } from '../components/charts';
 
 const UserProfilePage = () => {
@@ -121,39 +121,154 @@ const UserProfilePage = () => {
         };
     };
 
+    // Transform sessions data for AverageDailyTimeChart
+    const transformSessionsForAverageDailyTime = (sessionsData) => {
+        if (!sessionsData || sessionsData.length === 0) {
+            return {
+                week: [0, 0, 0, 0, 0, 0, 0],
+                month: Array.from({ length: 30 }, () => 0),
+                year: Array.from({ length: 12 }, () => 0)
+            };
+        }
+
+        // Group sessions by day
+        const sessionsByDay = {};
+        sessionsData.forEach(session => {
+            const date = new Date(session.started_at).toDateString();
+            if (!sessionsByDay[date]) {
+                sessionsByDay[date] = 0;
+            }
+            sessionsByDay[date] += session.duration_minutes / 60; // Convert to hours
+        });
+
+        // Create week data (last 7 days)
+        const weekData = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dayKey = date.toDateString();
+            weekData.push(sessionsByDay[dayKey] || 0);
+        }
+
+        // Create month data (last 30 days)
+        const monthData = [];
+        for (let i = 29; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dayKey = date.toDateString();
+            monthData.push(sessionsByDay[dayKey] || 0);
+        }
+
+        // Create year data (last 12 months)
+        const yearData = [];
+        for (let i = 11; i >= 0; i--) {
+            const date = new Date();
+            date.setMonth(date.getMonth() - i);
+            const monthKey = date.getFullYear() + '-' + (date.getMonth() + 1);
+            const monthSessions = sessionsData.filter(session => {
+                const sessionDate = new Date(session.started_at);
+                return sessionDate.getFullYear() === date.getFullYear() &&
+                    sessionDate.getMonth() === date.getMonth();
+            });
+            const monthHours = monthSessions.reduce((sum, session) => sum + session.duration_minutes / 60, 0);
+            yearData.push(monthHours);
+        }
+
+        return {
+            week: weekData,
+            month: monthData,
+            year: yearData
+        };
+    };
+
+    // Transform sessions data for MostUsedTimeChart
+    const transformSessionsForMostUsedTime = (sessionsData) => {
+        if (!sessionsData || sessionsData.length === 0) {
+            return {
+                midnight: 0.1,
+                fourAM: 0.1,
+                eightAM: 0.1,
+                noon: 0.1,
+                fourPM: 0.1,
+                eightPM: 0.1
+            };
+        }
+
+        const timeSlots = {
+            midnight: 0,
+            fourAM: 0,
+            eightAM: 0,
+            noon: 0,
+            fourPM: 0,
+            eightPM: 0
+        };
+
+        sessionsData.forEach(session => {
+            const hour = new Date(session.started_at).getHours();
+            const duration = session.duration_minutes / 60; // Convert to hours
+
+            if (hour >= 0 && hour < 4) timeSlots.midnight += duration;
+            else if (hour >= 4 && hour < 8) timeSlots.fourAM += duration;
+            else if (hour >= 8 && hour < 12) timeSlots.eightAM += duration;
+            else if (hour >= 12 && hour < 16) timeSlots.noon += duration;
+            else if (hour >= 16 && hour < 20) timeSlots.fourPM += duration;
+            else if (hour >= 20 && hour < 24) timeSlots.eightPM += duration;
+        });
+
+        return timeSlots;
+    };
+
+    // Transform sessions data for ProgressChart
+    const transformSessionsForProgress = (sessionsData) => {
+        if (!sessionsData || sessionsData.length === 0) {
+            return {
+                subOneHourDays: { current: 0, target: 50 },
+                daysUnderAverage: { current: 0, target: 100 },
+                daysTracked: { current: 0, target: 365 }
+            };
+        }
+
+        const totalDays = sessionsData.length;
+        const subOneHourDays = sessionsData.filter(session => session.duration_minutes < 60).length;
+        const avgDuration = sessionsData.reduce((sum, session) => sum + session.duration_minutes, 0) / totalDays;
+        const daysUnderAverage = sessionsData.filter(session => session.duration_minutes < avgDuration).length;
+
+        return {
+            subOneHourDays: { current: subOneHourDays, target: 50 },
+            daysUnderAverage: { current: daysUnderAverage, target: 100 },
+            daysTracked: { current: totalDays, target: 365 }
+        };
+    };
+
     if (loading) {
         return (
-            <div className="min-h-screen bg-zinc-900 text-zinc-100">
-                <NavigationHeader />
-                <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-                    <div className="text-xl">Loading profile...</div>
+            <Layout>
+                <div className="flex items-center justify-center min-h-[60vh]">
+                    <div className="text-xl text-zinc-300">Loading profile...</div>
                 </div>
-            </div>
+            </Layout>
         );
     }
 
     if (!profileUser) {
         return (
-            <div className="min-h-screen bg-zinc-900 text-zinc-100">
-                <NavigationHeader />
-                <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-                    <div className="text-xl">User not found</div>
+            <Layout>
+                <div className="flex items-center justify-center min-h-[60vh]">
+                    <div className="text-xl text-zinc-300">User not found</div>
                 </div>
-            </div>
+            </Layout>
         );
     }
 
     return (
-        <div className="min-h-screen bg-zinc-900 text-zinc-100">
-            <NavigationHeader />
-
-            <div className="max-w-7xl mx-auto px-6 py-8">
+        <Layout>
+            <div className="px-0 py-0">
                 {/* Header */}
                 <div className="mb-8">
                     <div className="flex items-center justify-between mb-4">
                         <div>
                             <h1 className="text-3xl font-bold text-zinc-100 mb-2">
-                                {profileUser.username}'s Profile
+                                {profileUser.username}'s Dashboard
                             </h1>
                             <p className="text-zinc-400">Productivity analytics and insights</p>
                         </div>
@@ -166,57 +281,35 @@ const UserProfilePage = () => {
                     </div>
                 </div>
 
-                {/* Summary Cards */}
-                {summary && (
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <div className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-6">
-                            <h3 className="text-sm font-medium text-zinc-400 mb-2">Total Time</h3>
-                            <p className="text-2xl font-bold text-zinc-100">{summary.totalHours}h</p>
-                        </div>
-                        <div className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-6">
-                            <h3 className="text-sm font-medium text-zinc-400 mb-2">Sessions</h3>
-                            <p className="text-2xl font-bold text-zinc-100">{summary.sessionCount}</p>
-                        </div>
-                        <div className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-6">
-                            <h3 className="text-sm font-medium text-zinc-400 mb-2">Avg Session</h3>
-                            <p className="text-2xl font-bold text-zinc-100">{summary.avgSessionLength}m</p>
-                        </div>
-                        <div className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-6">
-                            <h3 className="text-sm font-medium text-zinc-400 mb-2">Activities</h3>
-                            <p className="text-2xl font-bold text-zinc-100">{activities.length}</p>
-                        </div>
-                    </div>
-                )}
-
                 {/* Charts Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <div className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-6">
                         <h3 className="text-lg font-semibold text-zinc-100 mb-4">Average Daily Time</h3>
-                        <AverageDailyTimeChart sessions={sessions} />
+                        <AverageDailyTimeChart data={transformSessionsForAverageDailyTime(sessions)} currentRange={dateRange} onRangeChange={setDateRange} />
                     </div>
                     <div className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-6">
                         <h3 className="text-lg font-semibold text-zinc-100 mb-4">Most Used Time</h3>
-                        <MostUsedTimeChart sessions={sessions} />
+                        <MostUsedTimeChart data={transformSessionsForMostUsedTime(sessions)} />
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <div className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-6">
                         <h3 className="text-lg font-semibold text-zinc-100 mb-4">Best Performances</h3>
-                        <BestPerformancesChart sessions={sessions} />
+                        <BestPerformancesChart activities={activities} sessions={sessions} />
                     </div>
                     <div className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-6">
                         <h3 className="text-lg font-semibold text-zinc-100 mb-4">Activity Breakdown</h3>
-                        <DonutChart sessions={sessions} />
+                        <DonutChart activities={activities} sessions={sessions} />
                     </div>
                 </div>
 
                 <div className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-6">
                     <h3 className="text-lg font-semibold text-zinc-100 mb-4">Progress Tracking</h3>
-                    <ProgressChart sessions={sessions} />
+                    <ProgressChart data={transformSessionsForProgress(sessions)} />
                 </div>
             </div>
-        </div>
+        </Layout>
     );
 };
 

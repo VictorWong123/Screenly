@@ -5,23 +5,9 @@ const Toolbar = ({
   setDateRange,
   compareMode,
   setCompareMode,
-  onExport,
-  onImport
+  onExport
 }) => {
   const fileInputRef = useRef(null);
-
-  const handleImport = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      onImport(file);
-    }
-    // Reset input
-    event.target.value = '';
-  };
 
   const handleExport = () => {
     onExport();
@@ -45,8 +31,8 @@ const Toolbar = ({
                 key={rangeOption}
                 onClick={() => setDateRange(rangeOption)}
                 className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${dateRange === rangeOption
-                    ? 'bg-purple-600 text-white shadow-sm'
-                    : 'text-zinc-300 hover:text-zinc-100'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-zinc-300 hover:text-zinc-100'
                   }`}
               >
                 {rangeOption === 'day' ? 'Today' :
@@ -60,8 +46,8 @@ const Toolbar = ({
         <button
           onClick={() => setCompareMode(compareMode === 'previous' ? 'none' : 'previous')}
           className={`px-3 py-1 text-sm font-medium rounded-lg transition-colors ${compareMode === 'previous'
-              ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30'
-              : 'bg-zinc-700/50 text-zinc-300 hover:text-zinc-100 border border-zinc-600/50'
+            ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30'
+            : 'bg-zinc-700/50 text-zinc-300 hover:text-zinc-100 border border-zinc-600/50'
             }`}
         >
           Compare vs previous
@@ -76,21 +62,6 @@ const Toolbar = ({
         >
           Export JSON
         </button>
-
-        <button
-          onClick={handleImport}
-          className="px-3 py-1 text-sm font-medium text-zinc-300 hover:text-zinc-100 border border-zinc-600/50 rounded-lg hover:bg-zinc-700/50 transition-colors"
-        >
-          Import JSON
-        </button>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json"
-          onChange={handleFileChange}
-          className="hidden"
-        />
       </div>
     </div>
   );

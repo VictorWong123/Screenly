@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import NavigationHeader from '../components/NavigationHeader';
+import Layout from '../components/Layout';
 import LeaderboardCard from '../components/LeaderboardCard';
 
 const LeaderboardPage = () => {
@@ -165,33 +165,30 @@ const LeaderboardPage = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-zinc-900 text-zinc-100">
-                <NavigationHeader />
-                <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-                    <div className="text-xl">Loading leaderboard...</div>
+            <Layout>
+                <div className="flex items-center justify-center min-h-[60vh]">
+                    <div className="text-xl text-zinc-300">Loading leaderboard...</div>
                 </div>
-            </div>
+            </Layout>
         );
     }
 
     return (
-        <div className="min-h-screen bg-zinc-900 text-zinc-100">
-            <NavigationHeader />
-
-            <div className="max-w-7xl mx-auto px-6 py-8">
+        <Layout>
+            <div className="px-0 py-0">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-zinc-100 mb-2">Leaderboard</h1>
-                        <p className="text-zinc-400">Compare your productivity with other users</p>
+                        <h1 className="text-2xl font-semibold text-zinc-100 mb-1 tracking-tight">Leaderboard</h1>
+                        <p className="text-zinc-500 text-sm">Compare your productivity with other users</p>
                     </div>
 
                     {/* View Toggle */}
-                    <div className="flex items-center space-x-2 bg-zinc-800 rounded-lg p-1">
+                    <div className="flex items-center space-x-2 bg-zinc-900/60 border border-zinc-800 rounded-lg p-1">
                         <button
                             onClick={() => setViewMode('grid')}
                             className={`p-2 rounded-md transition-colors ${viewMode === 'grid'
-                                ? 'bg-purple-600 text-white'
+                                ? 'bg-purple-600 text-white shadow'
                                 : 'text-zinc-400 hover:text-zinc-200'
                                 }`}
                         >
@@ -202,7 +199,7 @@ const LeaderboardPage = () => {
                         <button
                             onClick={() => setViewMode('list')}
                             className={`p-2 rounded-md transition-colors ${viewMode === 'list'
-                                ? 'bg-purple-600 text-white'
+                                ? 'bg-purple-600 text-white shadow'
                                 : 'text-zinc-400 hover:text-zinc-200'
                                 }`}
                         >
@@ -231,7 +228,7 @@ const LeaderboardPage = () => {
                     ))}
                 </div>
             </div>
-        </div>
+        </Layout>
     );
 };
 

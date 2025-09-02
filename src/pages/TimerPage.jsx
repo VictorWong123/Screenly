@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import NavigationHeader from '../components/NavigationHeader';
+import Layout from '../components/Layout';
 
 const TimerPage = () => {
   const { user, supabase } = useAuth();
@@ -584,22 +584,19 @@ const TimerPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-900">
-        <NavigationHeader />
-        <div className="flex items-center justify-center pt-20">
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-100 mx-auto mb-4"></div>
             <p className="text-zinc-400">Loading Timer...</p>
           </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-zinc-100">
-      <NavigationHeader />
-
+    <Layout>
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
@@ -932,7 +929,7 @@ const TimerPage = () => {
           </div>
         )}
       </div>
-    </div>
+    </Layout>
   );
 };
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import NavigationHeader from '../components/NavigationHeader';
+import Layout from '../components/Layout';
 
 const LoginPage = () => {
     const [isSignUp, setIsSignUp] = useState(false);
@@ -31,9 +31,8 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-900 text-zinc-100">
-            <NavigationHeader />
-            <div className="flex items-center justify-center pt-20">
+        <Layout>
+            <div className="flex items-center justify-center">
                 <div className="max-w-md w-full mx-6">
                     <div className="bg-zinc-800/50 backdrop-blur-sm rounded-xl border border-zinc-700/50 p-8">
                         <div className="text-center mb-8">
@@ -122,7 +121,7 @@ const LoginPage = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </Layout>
     );
 };
 

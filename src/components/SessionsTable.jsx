@@ -60,6 +60,7 @@ const SessionsTable = ({
     };
 
     const handleSave = (sessionId) => {
+        if (!onEdit) return;
         onEdit(sessionId, editData);
         setEditingId(null);
         setEditData({});
@@ -71,6 +72,7 @@ const SessionsTable = ({
     };
 
     const handleDelete = (sessionId) => {
+        if (!onDelete) return;
         if (window.confirm('Are you sure you want to delete this session?')) {
             onDelete(sessionId);
         }
@@ -99,7 +101,9 @@ const SessionsTable = ({
                             <th className="text-left py-3 px-2 font-medium text-zinc-400">Duration</th>
                             <th className="text-left py-3 px-2 font-medium text-zinc-400">Activity</th>
                             <th className="text-left py-3 px-2 font-medium text-zinc-400">Category</th>
-                            <th className="text-left py-3 px-2 font-medium text-zinc-400">Actions</th>
+                            {onEdit || onDelete ? (
+                                <th className="text-left py-3 px-2 font-medium text-zinc-400">Actions</th>
+                            ) : null}
                         </tr>
                     </thead>
                     <tbody>
@@ -165,39 +169,47 @@ const SessionsTable = ({
                                         {getActivityCategory(session.activity_id)}
                                     </div>
                                 </td>
-                                <td className="py-3 px-2">
-                                    {editingId === session.id ? (
-                                        <div className="flex space-x-2">
-                                            <button
-                                                onClick={() => handleSave(session.id)}
-                                                className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
-                                            >
-                                                Save
-                                            </button>
-                                            <button
-                                                onClick={handleCancel}
-                                                className="px-2 py-1 bg-zinc-600 text-white text-xs rounded hover:bg-zinc-700 transition-colors"
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="flex space-x-2">
-                                            <button
-                                                onClick={() => handleEdit(session)}
-                                                className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(session.id)}
-                                                className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    )}
-                                </td>
+                                {onEdit || onDelete ? (
+                                    <td className="py-3 px-2">
+                                        {editingId === session.id ? (
+                                            <div className="flex space-x-2">
+                                                {onEdit ? (
+                                                    <button
+                                                        onClick={() => handleSave(session.id)}
+                                                        className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                                                    >
+                                                        Save
+                                                    </button>
+                                                ) : null}
+                                                <button
+                                                    onClick={handleCancel}
+                                                    className="px-2 py-1 bg-zinc-600 text-white text-xs rounded hover:bg-zinc-700 transition-colors"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex space-x-2">
+                                                {onEdit ? (
+                                                    <button
+                                                        onClick={() => handleEdit(session)}
+                                                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                ) : null}
+                                                {onDelete ? (
+                                                    <button
+                                                        onClick={() => handleDelete(session.id)}
+                                                        className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                ) : null}
+                                            </div>
+                                        )}
+                                    </td>
+                                ) : null}
                             </tr>
                         ))}
                     </tbody>
